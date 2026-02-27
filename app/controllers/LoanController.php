@@ -101,14 +101,18 @@ class LoanController extends Controller
             $this->redirect('/loans/create?client_id=' . ($data['client_id'] ?? ''));
         }
 
-        // Convert rate if annual
-        $rate     = (float)$data['interest_rate'];
+        // Sanitizar campos opcionales vacíos → null
+        $data['term_months']    = isset($data['term_months'])   && $data['term_months']   !== '' ? (int)$data['term_months']   : null;
+        $data['assigned_to']    = isset($data['assigned_to'])   && $data['assigned_to']   !== '' ? (int)$data['assigned_to']   : null;
+        $data['maturity_date']  = isset($data['maturity_date']) && $data['maturity_date'] !== '' ? $data['maturity_date']      : null;
+        $data['notes']          = trim($data['notes'] ?? '') ?: null;
+
+        // Convertir tasa de % a decimal (form envía 20 para 20%)
+        $rate     = (float)$data['interest_rate'] / 100;
         $rateType = $data['rate_type'] ?? 'monthly';
-        if ($rateType === 'annual') $rate = $rate / 100;
-        else $rate = $rate / 100;
 
         $data['interest_rate'] = $rate;
-        $data['late_fee_rate'] = (float)$data['late_fee_rate'] / 100;
+        $data['late_fee_rate'] = !empty($data['late_fee_rate']) ? (float)$data['late_fee_rate'] / 100 : (float)setting('default_late_fee_rate', 0.05);
 
         DB::beginTransaction();
         try {

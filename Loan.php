@@ -79,29 +79,25 @@ class Loan
                           [strlen($prefix) + 1, $prefix . '%']);
         $number = $prefix . str_pad((string)(($last['n'] ?? 0) + 1), 6, '0', STR_PAD_LEFT);
 
-        // Helper: convierte '' o '0' a null para campos opcionales enteros
-        $nullableInt = fn($v) => (isset($v) && $v !== '' && (int)$v > 0) ? (int)$v : null;
-        $nullableStr = fn($v) => (isset($v) && trim((string)$v) !== '') ? trim($v) : null;
-
         return (int)DB::insert('loans', [
-            'client_id'         => (int)$data['client_id'],
-            'assigned_to'       => $nullableInt($data['assigned_to'] ?? null),
-            'created_by'        => $createdBy,
-            'loan_number'       => $number,
-            'loan_type'         => $data['loan_type'],
-            'principal'         => (float)$data['principal'],
-            'interest_rate'     => (float)$data['interest_rate'],
-            'rate_type'         => $data['rate_type'] ?? 'monthly',
-            'term_months'       => $nullableInt($data['term_months'] ?? null),
-            'late_fee_rate'     => (float)($data['late_fee_rate'] ?? setting('default_late_fee_rate', 0.05)),
-            'grace_days'        => (int)($data['grace_days'] ?? setting('grace_days', 3)),
-            'disbursement_date' => $data['disbursement_date'],
+            'client_id'        => $data['client_id'],
+            'assigned_to'      => $data['assigned_to'] ?: null,
+            'created_by'       => $createdBy,
+            'loan_number'      => $number,
+            'loan_type'        => $data['loan_type'],
+            'principal'        => $data['principal'],
+            'interest_rate'    => $data['interest_rate'],
+            'rate_type'        => $data['rate_type'] ?? 'monthly',
+            'term_months'      => $data['term_months'] ?? null,
+            'late_fee_rate'    => $data['late_fee_rate'] ?? setting('default_late_fee_rate', 0.05),
+            'grace_days'       => $data['grace_days'] ?? setting('grace_days', 3),
+            'disbursement_date'=> $data['disbursement_date'],
             'first_payment_date'=> $data['first_payment_date'],
-            'maturity_date'     => $nullableStr($data['maturity_date'] ?? null),
-            'status'            => 'active',
-            'balance'           => (float)$data['principal'],
-            'apply_payment_to'  => $data['apply_payment_to'] ?? 'interest_first',
-            'notes'             => $nullableStr($data['notes'] ?? null),
+            'maturity_date'    => $data['maturity_date'] ?? null,
+            'status'           => 'active',
+            'balance'          => $data['principal'],
+            'apply_payment_to' => $data['apply_payment_to'] ?? 'interest_first',
+            'notes'            => $data['notes'] ?? null,
         ]);
     }
 

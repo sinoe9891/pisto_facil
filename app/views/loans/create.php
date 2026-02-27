@@ -113,9 +113,10 @@
             </select>
           </div>
           <div class="col-md-2" id="term_col">
-            <label class="form-label">Plazo (meses)</label>
+            <label class="form-label">Plazo (meses) <span class="text-danger" id="term_star">*</span></label>
             <input type="number" name="term_months" id="term_months" class="form-control"
                    min="1" max="360" placeholder="Ej: 12">
+            <div class="form-text" id="term_hint">Requerido para Tipo A</div>
           </div>
           <div class="col-md-4">
             <label class="form-label">Fecha Desembolso</label>
@@ -207,14 +208,34 @@ function goStep(n) {
 }
 
 // Loan type card selection
+function updateTypeUI(type) {
+  const termCol    = document.getElementById('term_col');
+  const termInput  = document.getElementById('term_months');
+  const rateCol    = document.getElementById('rate_type').closest('.col-md-3');
+
+  if (type === 'A') {
+    termCol.style.display  = '';
+    rateCol.style.display  = '';
+    termInput.required     = true;
+  } else {
+    termCol.style.display  = 'none';
+    rateCol.style.display  = 'none';
+    termInput.required     = false;
+    termInput.value        = '';   // limpiar valor para que no se envíe
+  }
+}
+
 document.querySelectorAll('.loan-type-radio').forEach(r => {
   r.addEventListener('change', () => {
     document.querySelectorAll('.type-card').forEach(c => c.classList.remove('border-primary'));
     document.querySelector('.type-card[data-type="'+r.value+'"]').classList.add('border-primary');
-    document.getElementById('term_col').style.display = r.value === 'A' ? '' : 'none';
-    document.getElementById('rate_type').closest('.col-md-3').style.display = r.value === 'A' ? '' : 'none';
+    updateTypeUI(r.value);
+    calcPreview();
   });
 });
+
+// Inicializar al cargar la página
+updateTypeUI(document.querySelector('input[name="loan_type"]:checked')?.value || 'A');
 
 document.getElementById('rate_type').addEventListener('change', function() {
   document.getElementById('rate_type_label').textContent = this.value === 'annual' ? '%/año' : '%/mes';
