@@ -74,6 +74,15 @@
     }
     /* ALERTS */
     .alert-dismissible .btn-close { padding:.6rem; }
+    .brand-logo {
+      width: 100px;
+      /* ajusta aquí: 120/160/180... */
+      height: auto;
+      /* mantiene proporción */
+      display: block;
+      margin: 0.75rem auto 0.5rem;
+      /* centrado */
+    }
   </style>
 </head>
 <body>
@@ -81,8 +90,9 @@
 <!-- SIDEBAR -->
 <nav id="sidebar">
   <div class="brand">
-    <span class="icon"><i class="bi bi-bank2 text-white"></i></span>
-    <?= htmlspecialchars($config['name'] ?? 'Préstamos') ?>
+    <!-- <span class="icon"><i class="bi bi-bank2 text-white"></i></span> -->
+     <img class="brand-logo" src="<?= e(url('assets/img/logo.jpg')) ?>" alt="Logo">
+    <!-- <?= htmlspecialchars($config['name'] ?? 'Préstamos') ?> -->
   </div>
 
   <?php $role = $auth['role'] ?? ''; $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); ?>
