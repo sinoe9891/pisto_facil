@@ -1,4 +1,4 @@
-<form action="<?= url('/login') ?>" method="POST" autocomplete="off">
+<form action="<?= e(url('login')) ?>" method="POST" autocomplete="off">
   <?= \App\Core\CSRF::field() ?>
 
   <div class="mb-3">
