@@ -94,7 +94,7 @@ class Auth
     public static function requireGuest(): void
     {
         if (self::check()) {
-            header('Location: ' . url('/dashboard'));
+            header('Location: ' . url('dashboard'));
             exit;
         }
     }

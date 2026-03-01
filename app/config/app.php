@@ -3,7 +3,7 @@
 
 return [
     'name'        => $_ENV['APP_NAME']  ?? 'SistemaPréstamos',
-    'url'         => $_ENV['APP_URL']   ?? 'http://localhost/loanapp/public',
+    'url'         => $_ENV['APP_URL']   ?? 'http://localhost:8282/loanapp/public',
     'env'         => $_ENV['APP_ENV']   ?? 'production',
     'debug'       => filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN),
     'timezone'    => $_ENV['APP_TZ']    ?? 'America/Tegucigalpa',

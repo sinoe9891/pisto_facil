@@ -110,9 +110,13 @@ class MonthlySimpleInterestCalculator implements LoanCalculatorInterface
             $daysOverdue = (int)$firstDue->diff($asOf)->days;
             $maxDaysLate = $daysOverdue;
 
-            // Períodos transcurridos sin pagar (redondeado arriba)
-            // ej: 60 días con frecuencia mensual (30 días) = 2 períodos
-            $periodsElapsed = (int)ceil($daysOverdue / $freqDays);
+            // Períodos transcurridos sin pagar.
+            // Usamos floor + 1 para contar correctamente el período actual.
+            // Ejemplo: hoy es exactamente el 4to vencimiento (90 días con frec. mensual):
+            //   ceil(90/30) = 3  ← INCORRECTO, pierde el período de hoy
+            //   floor(90/30)+1 = 4  ← CORRECTO
+            // Para días intermedios: floor(45/30)+1 = 1+1 = 2 ✓
+            $periodsElapsed = (int)floor($daysOverdue / $freqDays) + 1;
 
             // Interés acumulado = balance × tasa × períodos
             $accumulatedInterest = round($balance * $periodRate * max(1, $periodsElapsed), 2);
@@ -138,14 +142,26 @@ class MonthlySimpleInterestCalculator implements LoanCalculatorInterface
 
         $pendingInterest = max(0, round($accumulatedInterest - $paidInterest, 2));
 
+        // Si el interés acumulado ya fue pagado completamente, el préstamo está
+        // "al día" aunque la fecha de vencimiento sea pasada. Resetear days_late,
+        // periods_elapsed y accumulated_interest para que refleje el próximo período.
+        if ($pendingInterest <= 0 && $totalLateFee <= 0) {
+            $maxDaysLate         = 0;
+            $periodsElapsed      = 0;
+            $totalLateFee        = 0;
+            // El interés acumulado ya no es relevante históricamente —
+            // mostrar solo el interés del próximo período sobre el saldo actual.
+            $accumulatedInterest = $periodInterest;
+        }
+
         return [
             'balance'             => $balance,
-            'period_interest'     => $periodInterest,       // 1 período (referencia)
-            'accumulated_interest'=> $accumulatedInterest,  // total acumulado real
+            'period_interest'     => $periodInterest,
+            'accumulated_interest'=> $accumulatedInterest,
             'paid_interest'       => $paidInterest,
-            'pending_interest'    => $pendingInterest,       // lo que falta por pagar
+            'pending_interest'    => $pendingInterest,
             'late_fee'            => $totalLateFee,
-            'total_due'           => round($pendingInterest + $totalLateFee, 2), // sin capital
+            'total_due'           => round($pendingInterest + $totalLateFee, 2),
             'total_due_with_cap'  => round($balance + $pendingInterest + $totalLateFee, 2),
             'balance_plus_period' => round($balance + $periodInterest, 2),
             'days_late'           => $maxDaysLate,
