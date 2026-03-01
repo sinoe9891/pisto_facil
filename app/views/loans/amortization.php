@@ -75,6 +75,7 @@ $periodInt      = (float)($currentState['period_interest'] ?? 0);
 </div>
 
 <!-- INFO CARDS -->
+ 
 <div class="row g-3 mb-4">
   <?php $infoItems = [
     ['Cliente',     $loan['client_name']],
