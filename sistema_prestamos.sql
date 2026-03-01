@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 27-02-2026 a las 04:37:36
+-- Tiempo de generación: 01-03-2026 a las 03:25:16
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -39,6 +39,20 @@ CREATE TABLE `audit_log` (
   `user_agent` varchar(500) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `audit_log`
+--
+
+INSERT INTO `audit_log` (`id`, `user_id`, `action`, `entity`, `entity_id`, `old_data`, `new_data`, `ip_address`, `user_agent`, `created_at`) VALUES
+(1, 1, 'create', 'loans', 1, NULL, NULL, '::1', NULL, '2026-02-27 14:04:18'),
+(2, 1, 'create', 'loans', 2, NULL, NULL, '::1', NULL, '2026-02-27 14:05:09'),
+(3, 1, 'create', 'loans', 3, NULL, NULL, '::1', NULL, '2026-02-27 14:24:35'),
+(4, 1, 'create', 'loans', 4, NULL, NULL, '::1', NULL, '2026-02-27 14:27:19'),
+(5, 1, 'create', 'loans', 5, NULL, NULL, '::1', NULL, '2026-02-27 17:11:00'),
+(6, 1, 'create', 'loans', 6, NULL, NULL, '::1', NULL, '2026-02-28 15:30:25'),
+(7, 1, 'create', 'loans', 7, NULL, NULL, '::1', NULL, '2026-02-28 15:37:16'),
+(8, 1, 'create', 'loans', 8, NULL, NULL, '::1', NULL, '2026-02-28 19:32:46');
 
 -- --------------------------------------------------------
 
@@ -117,13 +131,14 @@ CREATE TABLE `loans` (
   `interest_rate` decimal(7,4) NOT NULL COMMENT 'Tasa (mensual si type C, anual si A)',
   `rate_type` enum('monthly','annual') NOT NULL DEFAULT 'monthly',
   `term_months` tinyint(3) UNSIGNED DEFAULT NULL COMMENT 'Plazo en meses (requerido para tipo A)',
+  `payment_frequency` enum('weekly','biweekly','monthly','bimonthly','quarterly','semiannual','annual') NOT NULL DEFAULT 'monthly',
   `late_fee_rate` decimal(7,4) NOT NULL DEFAULT 0.0500 COMMENT 'Tasa moratoria mensual',
   `grace_days` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Días de gracia antes de mora',
   `disbursement_date` date NOT NULL,
   `first_payment_date` date DEFAULT NULL,
   `last_payment_date` date DEFAULT NULL COMMENT 'Fecha real último pago',
   `maturity_date` date DEFAULT NULL,
-  `status` enum('active','paid','defaulted','cancelled','restructured') NOT NULL DEFAULT 'active',
+  `status` enum('active','paid','defaulted','cancelled','restructured','deleted') NOT NULL,
   `balance` decimal(14,2) NOT NULL COMMENT 'Saldo capital actual',
   `total_interest_paid` decimal(14,2) NOT NULL DEFAULT 0.00,
   `total_late_fees_paid` decimal(14,2) NOT NULL DEFAULT 0.00,
@@ -144,7 +159,7 @@ CREATE TABLE `loan_events` (
   `id` int(10) UNSIGNED NOT NULL,
   `loan_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED DEFAULT NULL,
-  `event_type` enum('created','payment','restructured','status_change','note','document') NOT NULL,
+  `event_type` enum('created','updated','cancelled','deleted','payment','status_change') NOT NULL,
   `description` text NOT NULL,
   `meta` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`meta`)),
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
@@ -304,7 +319,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `role_id`, `name`, `email`, `password`, `phone`, `avatar`, `is_active`, `remember_token`, `password_reset_token`, `password_reset_expires`, `last_login`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Super Administrador', 'superadmin@pistofacil.com', '$2y$10$EIUlqL8jgIkyukumJNRUhe2akfSztxrBATrAi6cZXKKf0Yf2jjD.S', '+504 9999-0000', NULL, 1, NULL, NULL, NULL, '2026-02-26 21:22:00', '2026-02-26 20:30:08', '2026-02-26 21:22:00'),
+(1, 1, 'Super Administrador', 'superadmin@pistofacil.com', '$2y$10$EIUlqL8jgIkyukumJNRUhe2akfSztxrBATrAi6cZXKKf0Yf2jjD.S', '+504 9999-0000', NULL, 1, NULL, NULL, NULL, '2026-02-28 19:24:52', '2026-02-26 20:30:08', '2026-02-28 19:24:52'),
 (2, 2, 'Admin Demo', 'admin@pistofacil.com', '$2y$10$zsgnRT18MCpBk2ps6pHxqeBZrjgAaKfiy6zt1c7AvO2RNx0p2q/iq', '+504 9999-0001', NULL, 1, NULL, NULL, NULL, NULL, '2026-02-26 20:30:08', '2026-02-26 21:19:18'),
 (3, 3, 'Asesor Demo', 'asesor@pistofacil.com', '$2y$10$zsgnRT18MCpBk2ps6pHxqeBZrjgAaKfiy6zt1c7AvO2RNx0p2q/iq', '+504 9999-0002', NULL, 1, NULL, NULL, NULL, NULL, '2026-02-26 20:30:08', '2026-02-26 21:19:19');
 
@@ -418,7 +433,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `clients`
