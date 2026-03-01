@@ -28,7 +28,7 @@ class LoanController extends Controller
             'title'   => 'Préstamos',
             'paged'   => $paged,
             'filters' => $filters,
-            'advisors'=> $advisors,
+            'advisors' => $advisors,
         ]);
     }
 
@@ -126,9 +126,19 @@ class LoanController extends Controller
 
             // Whitelist columnas válidas de loan_installments (evita extra keys de calculadoras)
             $validInstCols = [
-                'installment_number','due_date','principal_amount','interest_amount',
-                'total_amount','balance_after','paid_amount','paid_principal',
-                'paid_interest','paid_late_fee','late_fee','days_late','status',
+                'installment_number',
+                'due_date',
+                'principal_amount',
+                'interest_amount',
+                'total_amount',
+                'balance_after',
+                'paid_amount',
+                'paid_principal',
+                'paid_interest',
+                'paid_late_fee',
+                'late_fee',
+                'days_late',
+                'status',
             ];
 
             // Save installments
@@ -149,13 +159,15 @@ class LoanController extends Controller
                 'loan_id'    => $loanId,
                 'user_id'    => Auth::id(),
                 'event_type' => 'created',
-                'description'=> 'Préstamo creado. Monto: ' . $data['principal'] . ' · Tipo: ' . $data['loan_type'],
+                'description' => 'Préstamo creado. Monto: ' . $data['principal'] . ' · Tipo: ' . $data['loan_type'],
                 'meta'       => json_encode($schedule),
             ]);
 
             DB::insert('audit_log', [
-                'user_id' => Auth::id(), 'action' => 'create',
-                'entity' => 'loans', 'entity_id' => $loanId,
+                'user_id' => Auth::id(),
+                'action' => 'create',
+                'entity' => 'loans',
+                'entity_id' => $loanId,
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
             ]);
 
@@ -179,7 +191,7 @@ class LoanController extends Controller
         $this->render('loans/edit', [
             'title'   => 'Editar: ' . $loan['loan_number'],
             'loan'    => $loan,
-            'advisors'=> $advisors,
+            'advisors' => $advisors,
         ]);
     }
 
@@ -187,7 +199,7 @@ class LoanController extends Controller
     public function update(string $id): void
     {
         CSRF::check();
-        $allowed = ['notes','assigned_to','status','late_fee_rate','grace_days'];
+        $allowed = ['notes', 'assigned_to', 'status', 'late_fee_rate', 'grace_days'];
         $data    = array_intersect_key($_POST, array_flip($allowed));
         if (isset($data['late_fee_rate'])) $data['late_fee_rate'] = (float)$data['late_fee_rate'] / 100;
 
@@ -207,22 +219,37 @@ class LoanController extends Controller
         }
 
         if ($loan['status'] === 'active') {
-            // Cancel active loan (soft)
             DB::update('loans', ['status' => 'cancelled'], 'id = ?', [(int)$id]);
+
+            $eventType = 'cancelled';
+
             DB::insert('loan_events', [
                 'loan_id'     => (int)$id,
                 'user_id'     => Auth::id(),
-                'event_type'  => 'cancelled',
-                'description' => 'Préstamo cancelado por ' . Auth::user()['name'],
+                'event_type'  => $eventType,
+                'description' => 'Préstamo cancelado por ' . (Auth::user()['name'] ?? 'usuario'),
                 'meta'        => json_encode(['previous_status' => 'active']),
             ]);
+
             $this->flashRedirect('/loans', 'success', 'Préstamo ' . $loan['loan_number'] . ' cancelado.');
         } else {
-            // Hard delete only if no payments
             $hasPayments = DB::row("SELECT COUNT(*) as n FROM payments WHERE loan_id = ? AND voided = 0", [(int)$id]);
-            if ($hasPayments['n'] > 0) {
-                $this->flashRedirect('/loans', 'error', 'No se puede eliminar un préstamo con pagos registrados. Cancélelo primero.');
+            if (($hasPayments['n'] ?? 0) > 0) {
+                // Soft delete (con historial)
+                DB::update('loans', ['status' => 'deleted'], 'id = ?', [(int)$id]);
+
+                DB::insert('loan_events', [
+                    'loan_id'     => (int)$id,
+                    'user_id'     => Auth::id(),
+                    'event_type'  => 'deleted',
+                    'description' => 'Préstamo marcado como eliminado (soft) por ' . (Auth::user()['name'] ?? 'usuario'),
+                    'meta'        => json_encode(['reason' => 'has_payments']),
+                ]);
+
+                $this->flashRedirect('/loans', 'success', 'Préstamo ' . $loan['loan_number'] . ' archivado/eliminado (sin borrar pagos).');
             }
+
+            // Si no tiene pagos, sí borramos todo
             DB::delete('loan_installments', 'loan_id = ?', [(int)$id]);
             DB::delete('loan_events',       'loan_id = ?', [(int)$id]);
             DB::delete('loans',             'id = ?',      [(int)$id]);

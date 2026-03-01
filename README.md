@@ -6,7 +6,7 @@
 ## 🔐 Credenciales iniciales
 | Email | Contraseña | Rol |
 |---|---|---|
-| superadmin@prestamos.hn | Admin@1234 | SuperAdmin |
+| superadmin@prestamos.hn | Stark989121*# | SuperAdmin |
 | admin@prestamos.hn | Admin@1234 | Admin |
 | asesor@prestamos.hn | Admin@1234 | Asesor |
 

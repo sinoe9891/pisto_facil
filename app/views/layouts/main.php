@@ -199,17 +199,19 @@
 
 <script>
 // Global SweetAlert2 confirm helper
-function confirmDelete(url, msg = '¿Está seguro de eliminar este registro?') {
-  Swal.fire({
-    title: '¿Confirmar eliminación?',
-    text: msg,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#ef4444',
-    cancelButtonColor: '#64748b',
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
-  }).then(r => { if (r.isConfirmed) window.location.href = url; });
+if (typeof window.confirmDelete !== 'function') {
+  window.confirmDelete = function(url, msg = '¿Está seguro de eliminar este registro?') {
+    Swal.fire({
+      title: '¿Confirmar eliminación?',
+      text: msg,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(r => { if (r.isConfirmed) window.location.href = url; });
+  }
 }
 
 function confirmAction(url, title, msg, icon = 'question') {

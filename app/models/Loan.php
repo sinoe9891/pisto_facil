@@ -27,22 +27,32 @@ class Loan
         $where  = ['1=1'];
         $params = [];
 
+        // Por defecto NO mostrar archivados (deleted) a menos que el usuario lo filtre explícitamente
+        if (empty($filters['status'])) {
+            $where[] = "l.status <> 'deleted'";
+        }
+
         if (!empty($filters['status'])) {
-            $where[] = 'l.status = ?'; $params[] = $filters['status'];
+            $where[] = 'l.status = ?';
+            $params[] = $filters['status'];
         }
         if (!empty($filters['loan_type'])) {
-            $where[] = 'l.loan_type = ?'; $params[] = $filters['loan_type'];
+            $where[] = 'l.loan_type = ?';
+            $params[] = $filters['loan_type'];
         }
         if (!empty($filters['search'])) {
             $s = "%{$filters['search']}%";
             $where[]  = "(l.loan_number LIKE ? OR CONCAT(c.first_name,' ',c.last_name) LIKE ?)";
-            $params[] = $s; $params[] = $s;
+            $params[] = $s;
+            $params[] = $s;
         }
         if (!empty($filters['assigned_to'])) {
-            $where[] = 'l.assigned_to = ?'; $params[] = $filters['assigned_to'];
+            $where[] = 'l.assigned_to = ?';
+            $params[] = $filters['assigned_to'];
         }
         if (!empty($filters['client_id'])) {
-            $where[] = 'l.client_id = ?'; $params[] = $filters['client_id'];
+            $where[] = 'l.client_id = ?';
+            $params[] = $filters['client_id'];
         }
         if (!empty($filters['filter']) && $filters['filter'] === 'overdue') {
             $where[] = "EXISTS (SELECT 1 FROM loan_installments li WHERE li.loan_id = l.id AND li.due_date < CURDATE() AND li.status IN ('pending','partial'))";
@@ -68,15 +78,22 @@ class Loan
         $count = (int)array_values(DB::row("SELECT COUNT(*) FROM loans l JOIN clients c ON c.id = l.client_id WHERE $whereStr", $params))[0];
         $data  = DB::all($sql, $params);
 
-        return ['data' => $data, 'total' => $count, 'per_page' => $perPage,
-                'current_page' => $page, 'last_page' => max(1, (int)ceil($count / $perPage))];
+        return [
+            'data' => $data,
+            'total' => $count,
+            'per_page' => $perPage,
+            'current_page' => $page,
+            'last_page' => max(1, (int)ceil($count / $perPage))
+        ];
     }
 
     public static function create(array $data, int $createdBy): int
     {
         $prefix = setting('loan_number_prefix', 'PRES-');
-        $last   = DB::row("SELECT MAX(CAST(SUBSTRING(loan_number, ?) AS UNSIGNED)) as n FROM loans WHERE loan_number LIKE ?",
-                          [strlen($prefix) + 1, $prefix . '%']);
+        $last   = DB::row(
+            "SELECT MAX(CAST(SUBSTRING(loan_number, ?) AS UNSIGNED)) as n FROM loans WHERE loan_number LIKE ?",
+            [strlen($prefix) + 1, $prefix . '%']
+        );
         $number = $prefix . str_pad((string)(($last['n'] ?? 0) + 1), 6, '0', STR_PAD_LEFT);
 
         // Helper: convierte '' o '0' a null para campos opcionales enteros
@@ -96,7 +113,7 @@ class Loan
             'late_fee_rate'     => (float)($data['late_fee_rate'] ?? setting('default_late_fee_rate', 0.05)),
             'grace_days'        => (int)($data['grace_days'] ?? setting('grace_days', 3)),
             'disbursement_date' => $data['disbursement_date'],
-            'first_payment_date'=> $data['first_payment_date'],
+            'first_payment_date' => $data['first_payment_date'],
             'maturity_date'     => $nullableStr($data['maturity_date'] ?? null),
             'status'            => 'active',
             'balance'           => (float)$data['principal'],
