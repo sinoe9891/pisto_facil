@@ -88,6 +88,7 @@ class DashboardController extends Controller
         // ---- RECENT PAYMENTS ----
         $recentPayments = DB::all(
             "SELECT p.id, p.payment_date, p.total_received, p.payment_method,
+                    p.loan_id,
                     l.loan_number,
                     CONCAT(c.first_name,' ',c.last_name) as client_name,
                     u.name as registered_by

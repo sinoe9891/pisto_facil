@@ -12,37 +12,102 @@ class VariablePaymentCalculator implements LoanCalculatorInterface
      * For Type B, buildSchedule returns only a single summary "open" entry
      * since there's no fixed schedule. Returns projection for info only.
      */
+    private const FREQ_DAYS = [
+        'weekly' => 7, 'biweekly' => 15, 'monthly' => 30,
+        'bimonthly' => 60, 'quarterly' => 90, 'semiannual' => 180, 'annual' => 365,
+    ];
+
+    private const FREQ_MODIFIER = [
+        'weekly' => '+7 days', 'biweekly' => '+15 days', 'monthly' => '+1 month',
+        'bimonthly' => '+2 months', 'quarterly' => '+3 months',
+        'semiannual' => '+6 months', 'annual' => '+1 year',
+    ];
+
+    /**
+     * Tipo B: Crea cuotas proyectadas de SOLO INTERÉS por período.
+     * El capital no amortiza en el calendario — se abona libremente al pagar.
+     * Si no se especifica term_months, crea 1 cuota abierta (comportamiento legacy).
+     */
     public function buildSchedule(array $loanData): array
     {
         $principal        = (float)$loanData['principal'];
         $monthlyRate      = (float)$loanData['interest_rate'];
+        $termPeriods      = isset($loanData['term_months']) && $loanData['term_months'] > 0
+                            ? (int)$loanData['term_months'] : 0;
+        $frequency        = $loanData['payment_frequency'] ?? 'monthly';
+        $freqDays         = self::FREQ_DAYS[$frequency] ?? 30;
+        $modifier         = self::FREQ_MODIFIER[$frequency] ?? '+1 month';
         $firstPaymentDate = new \DateTime($loanData['first_payment_date']);
 
-        // Create a single "revolving" installment
-        $installments = [[
-            'installment_number' => 1,
-            'due_date'           => $firstPaymentDate->format('Y-m-d'),
-            'principal_amount'   => $principal,
-            'interest_amount'    => 0.00,     // Calculated on payment
-            'total_amount'       => $principal,
-            'balance_after'      => 0.00,
-            'paid_amount'        => 0.00,
-            'paid_principal'     => 0.00,
-            'paid_interest'      => 0.00,
-            'paid_late_fee'      => 0.00,
-            'late_fee'           => 0.00,
-            'days_late'          => 0,
-            'status'             => 'pending',
-        ]];
+        // Sin plazo definido → 1 cuota abierta (comportamiento original)
+        if ($termPeriods <= 0) {
+            return [
+                'installments' => [[
+                    'installment_number' => 1,
+                    'due_date'           => $firstPaymentDate->format('Y-m-d'),
+                    'principal_amount'   => $principal,
+                    'interest_amount'    => 0.00,
+                    'total_amount'       => $principal,
+                    'balance_after'      => 0.00,
+                    'paid_amount'        => 0.00, 'paid_principal' => 0.00,
+                    'paid_interest'      => 0.00, 'paid_late_fee'  => 0.00,
+                    'late_fee'           => 0.00, 'days_late'      => 0,
+                    'status'             => 'pending',
+                ]],
+                'monthly_payment' => 0, 'total_interest' => 0,
+                'total_payment'   => $principal,
+                'monthly_rate'    => $monthlyRate, 'annual_rate' => $monthlyRate * 12,
+                'note'            => 'Tipo B sin plazo: cuota abierta. Interés calculado al pagar.',
+            ];
+        }
+
+        // Con plazo → cuotas con CAPITAL FIJO por período, interés sobre saldo decreciente
+        // La cuota VARÍA (decrece) porque el interés baja a medida que baja el saldo
+        $periodRate      = $monthlyRate * ($freqDays / 30);
+        $capitalPerPeriod = round($principal / $termPeriods, 2);
+        $balance         = $principal;
+        $installments    = [];
+        $totalInterest   = 0;
+        $dueDate         = clone $firstPaymentDate;
+
+        for ($i = 1; $i <= $termPeriods; $i++) {
+            $interest = round($balance * $periodRate, 2);
+            $isLast   = ($i === $termPeriods);
+            // Capital fijo, excepto último período que cancela el residuo exacto
+            $capital  = $isLast ? $balance : $capitalPerPeriod;
+            $total    = round($capital + $interest, 2);
+            $balance  = round($balance - $capital, 2);
+
+            $installments[] = [
+                'installment_number' => $i,
+                'due_date'           => $dueDate->format('Y-m-d'),
+                'principal_amount'   => $capital,
+                'interest_amount'    => $interest,
+                'total_amount'       => $total,
+                'balance_after'      => max(0.00, $balance),
+                'paid_amount'        => 0.00, 'paid_principal' => 0.00,
+                'paid_interest'      => 0.00, 'paid_late_fee'  => 0.00,
+                'late_fee'           => 0.00, 'days_late'      => 0,
+                'status'             => 'pending',
+            ];
+
+            $totalInterest += $interest;
+            $dueDate->modify($modifier);
+        }
+
+        // Primera cuota (la más alta) como referencia
+        $firstPayment = round($capitalPerPeriod + round($principal * $periodRate, 2), 2);
 
         return [
             'installments'    => $installments,
-            'monthly_payment' => 0,
-            'total_interest'  => 0,
-            'total_payment'   => $principal,
+            'monthly_payment' => $firstPayment,   // cuota inicial (máxima)
+            'total_interest'  => round($totalInterest, 2),
+            'total_payment'   => round($principal + $totalInterest, 2),
             'monthly_rate'    => $monthlyRate,
+            'period_rate'     => $periodRate,
             'annual_rate'     => $monthlyRate * 12,
-            'note'            => 'Tipo B: Pagos variables. El interés se calcula al registrar cada pago.',
+            'frequency'       => $frequency,
+            'note'            => 'Tipo B: capital fijo por período, interés sobre saldo decreciente. Cuota varía (decrece).',
         ];
     }
 

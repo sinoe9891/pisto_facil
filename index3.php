@@ -5,9 +5,9 @@ declare(strict_types=1);
 // FRONT CONTROLLER - Sistema de Gestión de Préstamos
 // ============================================================
 
-define('ROOT_PATH',  __DIR__);
-define('APP_PATH',   ROOT_PATH . '/app');
-define('PUB_PATH',   __DIR__);
+define('ROOT_PATH', __DIR__);
+define('APP_PATH',  ROOT_PATH . '/app');
+define('PUB_PATH',  __DIR__);
 define('APP_VERSION','1.0.0');
 
 // Load .env (simple parser, no package needed)
@@ -123,7 +123,6 @@ $router->get( '/loans/{id}',          'LoanController@show',       ['auth','ases
 $router->get( '/loans/{id}/edit',     'LoanController@edit',       ['auth','admin']);
 $router->post('/loans/{id}/update',   'LoanController@update',     ['auth','admin']);
 $router->get( '/loans/{id}/amortization', 'LoanController@amortization', ['auth','asesor']);
-$router->post('/loans/{id}/delete',      'LoanController@destroy',      ['auth','admin']);
 
 // PAYMENTS
 $router->get( '/payments',             'PaymentController@index',   ['auth','asesor']);

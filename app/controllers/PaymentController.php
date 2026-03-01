@@ -120,15 +120,15 @@ class PaymentController extends Controller
             $this->flashRedirect('/payments/create', 'error', 'Préstamo no válido o inactivo.');
         }
 
-        // Number generation
         $prefix = setting('payment_number_prefix', 'PAG-');
-        $last   = DB::row("SELECT MAX(CAST(SUBSTRING(payment_number, ?) AS UNSIGNED)) as n FROM payments WHERE payment_number LIKE ?",
-                          [strlen($prefix) + 1, $prefix . '%']);
+        $last   = DB::row(
+            "SELECT MAX(CAST(SUBSTRING(payment_number, ?) AS UNSIGNED)) as n FROM payments WHERE payment_number LIKE ?",
+            [strlen($prefix) + 1, $prefix . '%']
+        );
         $payNum = $prefix . str_pad((string)(($last['n'] ?? 0) + 1), 6, '0', STR_PAD_LEFT);
 
         DB::beginTransaction();
         try {
-            // Insert payment header
             $payId = (int)DB::insert('payments', [
                 'loan_id'        => $loanId,
                 'payment_number' => $payNum,
@@ -140,7 +140,6 @@ class PaymentController extends Controller
                 'registered_by'  => Auth::id(),
             ]);
 
-            // Use calculator to distribute
             $calculator = CalculatorFactory::make($loan['loan_type']);
             $result     = $calculator->applyPayment($loan, $amount, new \DateTime($date));
 
@@ -149,44 +148,70 @@ class PaymentController extends Controller
             $totalLateFee  = 0;
 
             foreach ($result['items'] as $item) {
-                // Insert payment items
-                if ($item['paid_capital'] > 0) {
+                $status = $item['new_status'] ?? '';
+                $isExtraCapital  = ($status === 'extra_capital');
+                $isExtraInterest = ($status === 'extra_interest');
+
+                // Registrar partidas del pago
+                if (($item['paid_capital'] ?? 0) > 0) {
                     DB::insert('payment_items', [
                         'payment_id'     => $payId,
-                        'installment_id' => $item['installment_id'],
+                        'installment_id' => $item['installment_id'] ?? null,
                         'item_type'      => 'capital',
                         'amount'         => $item['paid_capital'],
                     ]);
                     $totalCapital += $item['paid_capital'];
                 }
-                if ($item['paid_interest'] > 0) {
+                if (($item['paid_interest'] ?? 0) > 0) {
                     DB::insert('payment_items', [
                         'payment_id'     => $payId,
-                        'installment_id' => $item['installment_id'],
+                        'installment_id' => $item['installment_id'] ?? null,
                         'item_type'      => 'interest',
                         'amount'         => $item['paid_interest'],
                     ]);
                     $totalInterest += $item['paid_interest'];
                 }
-                if ($item['paid_late_fee'] > 0) {
+                if (($item['paid_late_fee'] ?? 0) > 0) {
                     DB::insert('payment_items', [
                         'payment_id'     => $payId,
-                        'installment_id' => $item['installment_id'],
+                        'installment_id' => $item['installment_id'] ?? null,
                         'item_type'      => 'late_fee',
                         'amount'         => $item['paid_late_fee'],
                     ]);
                     $totalLateFee += $item['paid_late_fee'];
                 }
 
-                // Update installment
-                if ($item['installment_id'] && isset($item['new_status']) && $item['new_status'] !== 'extra_capital') {
+                if (!($item['installment_id'] ?? null)) continue;
+
+                if ($isExtraCapital) {
+                    // Abono voluntario de capital: solo actualizar paid_principal
                     $inst = DB::row("SELECT * FROM loan_installments WHERE id = ?", [$item['installment_id']]);
                     if ($inst) {
                         DB::update('loan_installments', [
-                            'paid_amount'    => $inst['paid_amount']   + $item['paid_capital'] + $item['paid_interest'],
-                            'paid_principal' => $inst['paid_principal']+ $item['paid_capital'],
-                            'paid_interest'  => $inst['paid_interest'] + $item['paid_interest'],
-                            'paid_late_fee'  => $inst['paid_late_fee'] + $item['paid_late_fee'],
+                            'paid_principal' => (float)$inst['paid_principal'] + $item['paid_capital'],
+                            'paid_amount'    => (float)$inst['paid_amount']    + $item['paid_capital'],
+                        ], 'id = ?', [$item['installment_id']]);
+                    }
+                } elseif ($isExtraInterest) {
+                    // Interés acumulado extra (más períodos de los que hay en el DB):
+                    // Registrar como paid_interest adicional en la última cuota
+                    $inst = DB::row("SELECT * FROM loan_installments WHERE id = ?", [$item['installment_id']]);
+                    if ($inst) {
+                        DB::update('loan_installments', [
+                            'paid_interest' => (float)$inst['paid_interest'] + $item['paid_interest'],
+                            'paid_amount'   => (float)$inst['paid_amount']   + $item['paid_interest'],
+                            'paid_date'     => $date,
+                        ], 'id = ?', [$item['installment_id']]);
+                    }
+                } else {
+                    // Cuota normal: actualizar todos los campos
+                    $inst = DB::row("SELECT * FROM loan_installments WHERE id = ?", [$item['installment_id']]);
+                    if ($inst) {
+                        DB::update('loan_installments', [
+                            'paid_amount'    => (float)$inst['paid_amount']    + ($item['paid_interest'] ?? 0) + ($item['paid_capital'] ?? 0),
+                            'paid_principal' => (float)$inst['paid_principal'] + ($item['paid_capital'] ?? 0),
+                            'paid_interest'  => (float)$inst['paid_interest']  + ($item['paid_interest'] ?? 0),
+                            'paid_late_fee'  => (float)$inst['paid_late_fee']  + ($item['paid_late_fee'] ?? 0),
                             'status'         => $item['new_status'],
                             'paid_date'      => $date,
                             'days_late'      => $item['days_late'] ?? 0,
@@ -196,7 +221,7 @@ class PaymentController extends Controller
                 }
             }
 
-            // Update loan balance and totals
+            // Actualizar saldo del préstamo
             $newBalance = max(0, round((float)$loan['balance'] - $totalCapital, 2));
             Loan::updateBalance($loanId, $newBalance, [
                 'total_paid'            => (float)$loan['total_paid']            + $amount,
@@ -205,20 +230,19 @@ class PaymentController extends Controller
                 'last_payment_date'     => $date,
             ]);
 
-            // Mark paid if complete
             Loan::markPaidIfComplete($loanId);
 
-            // Loan event
             DB::insert('loan_events', [
                 'loan_id'    => $loanId,
                 'user_id'    => Auth::id(),
                 'event_type' => 'payment',
-                'description'=> "Pago registrado: $payNum · {$amount}",
-                'meta'       => json_encode($result),
+                'description'=> "Pago registrado: $payNum · $amount",
+                'meta'       => json_encode(['result' => $result, 'totals' => compact('totalCapital','totalInterest','totalLateFee')]),
             ]);
 
             DB::commit();
             $this->flashRedirect("/payments/$payId", 'success', "Pago $payNum registrado exitosamente.");
+
         } catch (\Throwable $e) {
             DB::rollback();
             error_log('[PaymentController] ' . $e->getMessage());
@@ -273,7 +297,6 @@ class PaymentController extends Controller
 
         DB::beginTransaction();
         try {
-            // Reverse installment updates
             $items = DB::all("SELECT * FROM payment_items WHERE payment_id = ?", [(int)$id]);
             $reverseCapital  = 0;
             $reverseInterest = 0;
@@ -283,11 +306,11 @@ class PaymentController extends Controller
                 if ($item['installment_id']) {
                     $inst = DB::row("SELECT * FROM loan_installments WHERE id = ?", [$item['installment_id']]);
                     if ($inst) {
-                        $newPaidAmt  = max(0, $inst['paid_amount']    - ($item['item_type'] !== 'late_fee' ? $item['amount'] : 0));
-                        $newPaidPrin = max(0, $inst['paid_principal']  - ($item['item_type'] === 'capital'   ? $item['amount'] : 0));
-                        $newPaidInt  = max(0, $inst['paid_interest']   - ($item['item_type'] === 'interest'  ? $item['amount'] : 0));
-                        $newPaidLF   = max(0, $inst['paid_late_fee']   - ($item['item_type'] === 'late_fee'  ? $item['amount'] : 0));
-                        $newStatus   = $newPaidAmt > 0 ? 'partial' : 'pending';
+                        $newPaidAmt  = max(0, (float)$inst['paid_amount']    - ($item['item_type'] !== 'late_fee' ? $item['amount'] : 0));
+                        $newPaidPrin = max(0, (float)$inst['paid_principal']  - ($item['item_type'] === 'capital'   ? $item['amount'] : 0));
+                        $newPaidInt  = max(0, (float)$inst['paid_interest']   - ($item['item_type'] === 'interest'  ? $item['amount'] : 0));
+                        $newPaidLF   = max(0, (float)$inst['paid_late_fee']   - ($item['item_type'] === 'late_fee'  ? $item['amount'] : 0));
+                        $newStatus   = $newPaidAmt > 0.01 ? 'partial' : 'pending';
 
                         DB::update('loan_installments', [
                             'paid_amount'    => $newPaidAmt,
@@ -307,7 +330,6 @@ class PaymentController extends Controller
                 };
             }
 
-            // Restore loan balance
             $loan = Loan::find((int)$payment['loan_id']);
             if ($loan) {
                 $restoredBalance = (float)$loan['balance'] + $reverseCapital;

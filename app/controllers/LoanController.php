@@ -91,9 +91,10 @@ class LoanController extends Controller
             'disbursement_date'  => 'required|date',
             'first_payment_date' => 'required|date',
         ];
-        if ($data['loan_type'] === 'A') {
-            $rules['term_months'] = 'required|numeric|min_val:1|max_val:360';
+        if ($data['loan_type'] === 'A' || $data['loan_type'] === 'C') {
+            $rules['term_months'] = 'required|numeric|min_val:1|max_val:600';
         }
+        // Tipo B: term_months es opcional (para simulación). Si se proporciona, validar.
 
         $v = Validator::make($data, $rules);
         if ($v->fails()) {
@@ -105,7 +106,8 @@ class LoanController extends Controller
         $data['term_months']    = isset($data['term_months'])   && $data['term_months']   !== '' ? (int)$data['term_months']   : null;
         $data['assigned_to']    = isset($data['assigned_to'])   && $data['assigned_to']   !== '' ? (int)$data['assigned_to']   : null;
         $data['maturity_date']  = isset($data['maturity_date']) && $data['maturity_date'] !== '' ? $data['maturity_date']      : null;
-        $data['notes']          = trim($data['notes'] ?? '') ?: null;
+        $data['notes']             = trim($data['notes'] ?? '') ?: null;
+        $data['payment_frequency'] = $data['payment_frequency'] ?? 'monthly';
 
         // Convertir tasa de % a decimal (form envía 20 para 20%)
         $rate     = (float)$data['interest_rate'] / 100;
@@ -122,9 +124,18 @@ class LoanController extends Controller
             $calculator  = CalculatorFactory::make($data['loan_type']);
             $schedule    = $calculator->buildSchedule(array_merge($data, ['interest_rate' => $rate]));
 
+            // Whitelist columnas válidas de loan_installments (evita extra keys de calculadoras)
+            $validInstCols = [
+                'installment_number','due_date','principal_amount','interest_amount',
+                'total_amount','balance_after','paid_amount','paid_principal',
+                'paid_interest','paid_late_fee','late_fee','days_late','status',
+            ];
+
             // Save installments
             foreach ($schedule['installments'] as $inst) {
-                DB::insert('loan_installments', array_merge($inst, ['loan_id' => $loanId]));
+                $row = array_intersect_key($inst, array_flip($validInstCols));
+                $row['loan_id'] = $loanId;
+                DB::insert('loan_installments', $row);
             }
 
             // Maturity date
@@ -182,6 +193,41 @@ class LoanController extends Controller
 
         DB::update('loans', $data, 'id = ?', [(int)$id]);
         $this->flashRedirect("/loans/$id", 'success', 'Préstamo actualizado.');
+    }
+
+    // DESTROY (cancel or delete)
+    public function destroy(string $id): void
+    {
+        Auth::requireRole(['superadmin', 'admin']);
+        CSRF::check();
+
+        $loan = Loan::find((int)$id);
+        if (!$loan) {
+            $this->flashRedirect('/loans', 'error', 'Préstamo no encontrado.');
+        }
+
+        if ($loan['status'] === 'active') {
+            // Cancel active loan (soft)
+            DB::update('loans', ['status' => 'cancelled'], 'id = ?', [(int)$id]);
+            DB::insert('loan_events', [
+                'loan_id'     => (int)$id,
+                'user_id'     => Auth::id(),
+                'event_type'  => 'cancelled',
+                'description' => 'Préstamo cancelado por ' . Auth::user()['name'],
+                'meta'        => json_encode(['previous_status' => 'active']),
+            ]);
+            $this->flashRedirect('/loans', 'success', 'Préstamo ' . $loan['loan_number'] . ' cancelado.');
+        } else {
+            // Hard delete only if no payments
+            $hasPayments = DB::row("SELECT COUNT(*) as n FROM payments WHERE loan_id = ? AND voided = 0", [(int)$id]);
+            if ($hasPayments['n'] > 0) {
+                $this->flashRedirect('/loans', 'error', 'No se puede eliminar un préstamo con pagos registrados. Cancélelo primero.');
+            }
+            DB::delete('loan_installments', 'loan_id = ?', [(int)$id]);
+            DB::delete('loan_events',       'loan_id = ?', [(int)$id]);
+            DB::delete('loans',             'id = ?',      [(int)$id]);
+            $this->flashRedirect('/loans', 'success', 'Préstamo ' . $loan['loan_number'] . ' eliminado.');
+        }
     }
 
     // AMORTIZATION TABLE (printable)
