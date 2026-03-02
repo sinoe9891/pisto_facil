@@ -217,12 +217,12 @@
     }
 
     .brand-logo {
-      width: 100px;
+      width: 120px;
       /* ajusta aquí: 120/160/180... */
       height: auto;
       /* mantiene proporción */
       display: block;
-      margin: 0.75rem auto 0.5rem;
+      margin: 0 auto 0;
       /* centrado */
     }
   </style>
@@ -234,7 +234,7 @@
   <nav id="sidebar">
     <div class="brand">
       <!-- <span class="icon"><i class="bi bi-bank2 text-white"></i></span> -->
-      <img class="brand-logo" src="<?= e(url('assets/img/logo.jpg')) ?>" alt="Logo">
+      <img class="brand-logo" src="<?= e(url('assets/img/logo_blanco_pistofacil.png')) ?>" alt="Logo">
       <!-- <?= htmlspecialchars($config['name'] ?? 'Préstamos') ?> -->
     </div>
 
