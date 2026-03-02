@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>403 – Acceso Denegado</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="<?= url('assets/vendor/bootstrap/bootstrap.min.css') ?>">
   <style>
     body { background:#f1f5f9; display:flex; align-items:center; justify-content:center; min-height:100vh; }
     .error-card { max-width:440px; text-align:center; }

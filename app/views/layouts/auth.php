@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($title ?? 'Acceso') ?> · <?= htmlspecialchars($config['name'] ?? 'Préstamos') ?></title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="<?= url('assets/vendor/bootstrap/bootstrap.min.css') ?>">
+  <link rel="stylesheet" href="<?= url('/assets/vendor/bootstrap-icons/css/bootstrap-icons.min.css') ?>">
   <link rel="icon" type="image/x-icon" href="<?= e(url('assets/icons/favicon.ico')) ?>">
   <link rel="apple-touch-icon" href="<?= e(url('assets/icons/apple-touch-icon.png')) ?>">
   <style>
@@ -124,7 +124,7 @@
 
     <?= $content ?>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="<?= url('/assets/vendor/bootstrap/bootstrap.bundle.min.js') ?>"></script>
 </body>
 
 </html>

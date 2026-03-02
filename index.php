@@ -155,6 +155,16 @@ $router->get( '/reports/export',      'ReportController@export',   ['auth','admi
 $router->get( '/settings',            'SettingController@index',   ['auth','superadmin']);
 $router->post('/settings/update',     'SettingController@update',  ['auth','superadmin']);
 
+// CONTRACT TEMPLATES (Plantillas)
+$router->get('/contract-templates',                 'ContractTemplateController@index',  ['auth','superadmin']);
+$router->get('/contract-templates/create',          'ContractTemplateController@create', ['auth','superadmin']);
+$router->post('/contract-templates/store',          'ContractTemplateController@store',  ['auth','superadmin']);
+$router->get('/contract-templates/{id}/edit',       'ContractTemplateController@edit',   ['auth','superadmin']);
+$router->post('/contract-templates/{id}/update',    'ContractTemplateController@update', ['auth','superadmin']);
+$router->get('/contract-templates/{id}/toggle',     'ContractTemplateController@toggle', ['auth','superadmin']);
+$router->get('/contract-templates/{id}/preview',    'ContractTemplateController@preview',['auth','superadmin']);
+
+
 // CLIENT PORTAL
 $router->get('/my-loans',             'PortalController@index',    ['auth']);
 

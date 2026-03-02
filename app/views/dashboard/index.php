@@ -248,7 +248,12 @@ $role     = $auth['role'] ?? '';
     </div>
   </div>
 </div>
-
+<script>
+  // si Chart no existe, cargamos Chart.js
+  if (typeof Chart === 'undefined') {
+    document.write('<script src="<?= url('/assets/vendor/chartjs/chart.umd.min.js') ?>"><\/script>');
+  }
+</script>
 <script>
 (function() {
   const raw = <?= json_encode($loanStatusData) ?>;

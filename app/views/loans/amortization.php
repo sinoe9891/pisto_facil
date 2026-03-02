@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tabla de Amortización – <?= htmlspecialchars($loan['loan_number']) ?></title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="<?= url('assets/vendor/bootstrap/bootstrap.min.css') ?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
     @media print {
@@ -75,7 +75,7 @@ $periodInt      = (float)($currentState['period_interest'] ?? 0);
 </div>
 
 <!-- INFO CARDS -->
- 
+
 <div class="row g-3 mb-4">
   <?php $infoItems = [
     ['Cliente',     $loan['client_name']],
@@ -336,6 +336,6 @@ $periodInt      = (float)($currentState['period_interest'] ?? 0);
   <?php endif; ?>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="<?= url('/assets/vendor/bootstrap/bootstrap.bundle.min.js') ?>"></script>
 </body>
 </html>
