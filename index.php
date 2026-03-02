@@ -124,6 +124,11 @@ $router->get( '/loans/{id}/edit',     'LoanController@edit',       ['auth','admi
 $router->post('/loans/{id}/update',   'LoanController@update',     ['auth','admin']);
 $router->get( '/loans/{id}/amortization', 'LoanController@amortization', ['auth','asesor']);
 $router->post('/loans/{id}/delete',      'LoanController@destroy',      ['auth','admin']);
+$router->get('/loans/{id}/pagare',   'LoanController@pagare',   ['auth','asesor']);
+$router->get('/loans/{id}/contrato', 'LoanController@contrato', ['auth','asesor']);
+
+// AVALES (AJAX)
+$router->get('/avales/by-client', 'AvalController@byClient', ['auth','admin']);
 
 // PAYMENTS
 $router->get( '/payments',             'PaymentController@index',   ['auth','asesor']);
