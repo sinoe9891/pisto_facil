@@ -1,5 +1,8 @@
 <?php
-// app/controllers/SettingController.php
+/**
+ * app/controllers/SettingController.php
+ * VERSIÓN CORREGIDA - Guarda correctamente las cuentas bancarias
+ */
 
 namespace App\Controllers;
 
@@ -10,7 +13,7 @@ class SettingController extends Controller
 {
     public function index(): void
     {
-        $groups   = ['general','loans','dashboard','documents','reports'];
+        $groups   = ['general', 'loans', 'dashboard', 'documents', 'reports'];
         $settings = [];
         foreach ($groups as $g) {
             $settings[$g] = Setting::allByGroup($g);
@@ -28,14 +31,41 @@ class SettingController extends Controller
         $data = $_POST;
         unset($data['_csrf']);
 
+        // ─────────────────────────────────────────────────────
+        // GUARDAR TODOS LOS SETTINGS (incluyendo vacíos)
+        // ─────────────────────────────────────────────────────
         foreach ($data as $key => $value) {
+            $key = trim($key);
             if (!empty($key)) {
-                Setting::set(trim($key), trim($value), Auth::id());
+                // Guarda TODOS los valores (vacíos o no)
+                $value = is_array($value) ? json_encode($value) : trim($value);
+                Setting::set($key, $value, Auth::id());
+            }
+        }
+
+        // ─────────────────────────────────────────────────────
+        // VALIDAR QUE MÍNIMO UNA CUENTA BANCARIA ESTÉ COMPLETA
+        // ─────────────────────────────────────────────────────
+        $hasValidAccount = false;
+        for ($i = 1; $i <= 3; $i++) {
+            $bankName = Setting::get("bank_name_$i", '');
+            $bankAccount = Setting::get("bank_account_$i", '');
+            
+            if (!empty($bankName) && !empty($bankAccount)) {
+                $hasValidAccount = true;
+                break;
             }
         }
 
         Setting::clearCache();
-        View::flash('success', 'Configuración guardada exitosamente.');
+
+        // Mensaje de éxito
+        if ($hasValidAccount) {
+            View::flash('success', 'Configuración guardada exitosamente. ✓');
+        } else {
+            View::flash('warning', 'Configuración guardada. Recuerda configurar al menos una cuenta bancaria con Banco y Número de Cuenta.');
+        }
+
         $this->redirect('/settings');
     }
 }

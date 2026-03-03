@@ -1,5 +1,8 @@
 <?php
-// app/controllers/LoanController.php
+/**
+ * APP: app/controllers/LoanController.php
+ * VERSIÓN: Completa con Métodos de Pago
+ */
 
 namespace App\Controllers;
 
@@ -9,7 +12,9 @@ use App\Services\LoanCalculator\CalculatorFactory;
 
 class LoanController extends Controller
 {
-    // LIST
+    /**
+     * LISTA DE PRÉSTAMOS
+     */
     public function index(): void
     {
         $filters = [
@@ -28,11 +33,13 @@ class LoanController extends Controller
             'title'   => 'Préstamos',
             'paged'   => $paged,
             'filters' => $filters,
-            'advisors'=> $advisors,
+            'advisors' => $advisors,
         ]);
     }
 
-    // SHOW
+    /**
+     * VER DETALLE DE PRÉSTAMO
+     */
     public function show(string $id): void
     {
         $loan = Loan::find((int)$id);
@@ -58,7 +65,9 @@ class LoanController extends Controller
         ]);
     }
 
-    // CREATE WIZARD
+    /**
+     * FORMULARIO DE CREACIÓN
+     */
     public function create(): void
     {
         $clientId      = $this->get('client_id', '');
@@ -66,7 +75,6 @@ class LoanController extends Controller
         $clients       = DB::all("SELECT id, code, CONCAT(first_name,' ',last_name) as full_name FROM clients WHERE is_active=1 ORDER BY last_name");
         $advisors      = User::allAdvisors();
         $avalThreshold = (float)setting('aval_required_amount', 10000);
-        $aval          = $client ? Client::getAval((int)$client['id']) : null;
         $defaults      = [
             'late_fee_rate'      => setting('default_late_fee_rate', 0.05),
             'grace_days'         => setting('grace_days', 3),
@@ -80,17 +88,18 @@ class LoanController extends Controller
             'client'        => $client,
             'advisors'      => $advisors,
             'defaults'      => $defaults,
-            'aval'          => $aval,
-            'avalThreshold' => $avalThreshold,
         ]);
     }
 
-    // STORE
+    /**
+     * GUARDAR NUEVO PRÉSTAMO
+     */
     public function store(): void
     {
         CSRF::check();
         $data = $_POST;
 
+        // ─── VALIDACIONES ─────────────────────────────────────────────
         $rules = [
             'client_id'          => 'required|numeric|min_val:1',
             'loan_type'          => 'required|in:A,B,C',
@@ -109,6 +118,7 @@ class LoanController extends Controller
             $this->redirect('/loans/create?client_id=' . ($data['client_id'] ?? ''));
         }
 
+        // ─── NORMALIZAR DATOS ──────────────────────────────────────────
         $data['term_months']       = isset($data['term_months']) && $data['term_months'] !== '' ? (int)$data['term_months'] : null;
         $data['assigned_to']       = isset($data['assigned_to']) && $data['assigned_to'] !== '' ? (int)$data['assigned_to'] : null;
         $data['maturity_date']     = isset($data['maturity_date']) && $data['maturity_date'] !== '' ? $data['maturity_date'] : null;
@@ -119,17 +129,35 @@ class LoanController extends Controller
         $data['interest_rate'] = $rate;
         $data['late_fee_rate'] = !empty($data['late_fee_rate']) ? (float)$data['late_fee_rate'] / 100 : (float)setting('default_late_fee_rate', 0.05);
 
+        // ─── MÉTODOS DE PAGO (NUEVO) ───────────────────────────────────
+        $data['payment_method_cash']     = isset($_POST['payment_method_cash']) ? 1 : 0;
+        $data['payment_method_transfer'] = isset($_POST['payment_method_transfer']) ? 1 : 0;
+        $data['payment_method_check']    = isset($_POST['payment_method_check']) ? 1 : 0;
+        $data['payment_method_atm']      = isset($_POST['payment_method_atm']) ? 1 : 0;
+
         DB::beginTransaction();
         try {
+            // ─── CREAR PRÉSTAMO ───────────────────────────────────────
             $loanId = Loan::create($data, Auth::id());
 
+            // ─── GENERAR TABLA DE AMORTIZACIÓN ────────────────────────
             $calculator = CalculatorFactory::make($data['loan_type']);
             $schedule   = $calculator->buildSchedule(array_merge($data, ['interest_rate' => $rate]));
 
             $validInstCols = [
-                'installment_number','due_date','principal_amount','interest_amount',
-                'total_amount','balance_after','paid_amount','paid_principal',
-                'paid_interest','paid_late_fee','late_fee','days_late','status',
+                'installment_number',
+                'due_date',
+                'principal_amount',
+                'interest_amount',
+                'total_amount',
+                'balance_after',
+                'paid_amount',
+                'paid_principal',
+                'paid_interest',
+                'paid_late_fee',
+                'late_fee',
+                'days_late',
+                'status',
             ];
 
             foreach ($schedule['installments'] as $inst) {
@@ -138,17 +166,18 @@ class LoanController extends Controller
                 DB::insert('loan_installments', $row);
             }
 
+            // Actualizar fecha de vencimiento
             if (!empty($schedule['installments'])) {
                 $last = end($schedule['installments']);
                 DB::update('loans', ['maturity_date' => $last['due_date']], 'id = ?', [$loanId]);
             }
 
-            // Aval
+            // ─── AVAL ─────────────────────────────────────────────────
             if (!empty($data['aval_id'])) {
                 DB::update('loans', ['aval_id' => (int)$data['aval_id']], 'id = ?', [$loanId]);
             }
 
-            // Garantía
+            // ─── GARANTÍA ──────────────────────────────────────────────
             if (!empty($data['has_guarantee']) && !empty($data['guarantee_type'])) {
                 $gDesc = $data['g_description'] ?? '';
                 if (!$gDesc && $data['guarantee_type'] === 'vehiculo') {
@@ -169,6 +198,7 @@ class LoanController extends Controller
                 DB::update('loans', ['has_guarantee' => 1], 'id = ?', [$loanId]);
             }
 
+            // ─── REGISTRAR EVENTO ──────────────────────────────────────
             DB::insert('loan_events', [
                 'loan_id'     => $loanId,
                 'user_id'     => Auth::id(),
@@ -177,9 +207,12 @@ class LoanController extends Controller
                 'meta'        => json_encode($schedule),
             ]);
 
+            // ─── AUDITORÍA ─────────────────────────────────────────────
             DB::insert('audit_log', [
-                'user_id'    => Auth::id(), 'action' => 'create',
-                'entity'     => 'loans', 'entity_id' => $loanId,
+                'user_id'    => Auth::id(),
+                'action'     => 'create',
+                'entity'     => 'loans',
+                'entity_id'  => $loanId,
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
             ]);
 
@@ -187,13 +220,15 @@ class LoanController extends Controller
             $this->flashRedirect("/loans/$loanId", 'success', 'Préstamo creado exitosamente.');
         } catch (\Throwable $e) {
             DB::rollback();
-            error_log('[LoanController] ' . $e->getMessage());
+            error_log('[LoanController::store] ' . $e->getMessage());
             View::flash('error', 'Error al crear el préstamo: ' . $e->getMessage());
             $this->redirect('/loans/create');
         }
     }
 
-    // EDIT
+    /**
+     * FORMULARIO DE EDICIÓN
+     */
     public function edit(string $id): void
     {
         $loan = Loan::find((int)$id);
@@ -207,19 +242,64 @@ class LoanController extends Controller
         ]);
     }
 
-    // UPDATE
+    /**
+     * ACTUALIZAR PRÉSTAMO
+     */
     public function update(string $id): void
     {
         CSRF::check();
-        $allowed = ['notes','assigned_to','status','late_fee_rate','grace_days'];
+
+        $allowed = ['notes', 'assigned_to', 'status', 'late_fee_rate', 'grace_days'];
         $data    = array_intersect_key($_POST, array_flip($allowed));
-        if (isset($data['late_fee_rate'])) $data['late_fee_rate'] = (float)$data['late_fee_rate'] / 100;
+
+        // ─── NORMALIZAR NOTES ─────────────────────────────────────────
+        if (array_key_exists('notes', $data)) {
+            $data['notes'] = trim($data['notes'] ?? '') ?: null;
+        }
+
+        // ─── NORMALIZAR LATE_FEE_RATE ─────────────────────────────────
+        if (isset($data['late_fee_rate'])) {
+            $data['late_fee_rate'] = (float)$data['late_fee_rate'] / 100;
+        }
+
+        // ─── NORMALIZAR ASSIGNED_TO ───────────────────────────────────
+        if (array_key_exists('assigned_to', $data)) {
+            $assigned = $data['assigned_to'];
+
+            if ($assigned === '' || $assigned === null) {
+                $data['assigned_to'] = null;
+            } else {
+                $assigned = is_numeric($assigned) ? (int)$assigned : 0;
+
+                if ($assigned <= 0) {
+                    $data['assigned_to'] = null;
+                } else {
+                    $exists = DB::row("SELECT id FROM users WHERE id = ? LIMIT 1", [$assigned]);
+                    if (!$exists) {
+                        View::flash('error', 'El asesor seleccionado no existe.');
+                        $this->redirect("/loans/$id/edit");
+                    }
+                    $data['assigned_to'] = $assigned;
+                }
+            }
+        }
+
+        // ─── VALIDAR STATUS ───────────────────────────────────────────
+        if (isset($data['status'])) {
+            $allowedStatus = ['active', 'paid', 'defaulted', 'cancelled', 'restructured'];
+            if (!in_array($data['status'], $allowedStatus, true)) {
+                View::flash('error', 'Estado inválido.');
+                $this->redirect("/loans/$id/edit");
+            }
+        }
 
         DB::update('loans', $data, 'id = ?', [(int)$id]);
         $this->flashRedirect("/loans/$id", 'success', 'Préstamo actualizado.');
     }
 
-    // DESTROY
+    /**
+     * ELIMINAR / CANCELAR PRÉSTAMO
+     */
     public function destroy(string $id): void
     {
         Auth::requireRole(['superadmin', 'admin']);
@@ -250,7 +330,9 @@ class LoanController extends Controller
         }
     }
 
-    // AMORTIZATION TABLE (sin layout)
+    /**
+     * TABLA DE AMORTIZACIÓN (SIN LAYOUT)
+     */
     public function amortization(string $id): void
     {
         $loan         = Loan::find((int)$id);
@@ -267,7 +349,9 @@ class LoanController extends Controller
         ], null);
     }
 
-    // PAGARÉ (sin layout — página imprimible)
+    /**
+     * PAGARÉ (DOCUMENTO IMPRIMIBLE)
+     */
     public function pagare(string $id): void
     {
         $loan = Loan::find((int)$id);
@@ -284,24 +368,26 @@ class LoanController extends Controller
         ], null);
     }
 
-    // CONTRATO (sin layout — página imprimible)
+    /**
+     * CONTRATO DE PRÉSTAMO (DOCUMENTO IMPRIMIBLE)
+     */
     public function contrato(string $id): void
     {
         $loan = Loan::find((int)$id);
         if (!$loan) $this->redirect('/loans');
 
-        $client    = Client::find((int)$loan['client_id']);
-        $aval      = !empty($loan['aval_id']) ? Client::findAvalById((int)$loan['aval_id']) : null;
-        $guarantee = DB::row("SELECT * FROM loan_guarantees WHERE loan_id = ? LIMIT 1", [(int)$id]);
+        $client       = Client::find((int)$loan['client_id']);
+        $aval         = !empty($loan['aval_id']) ? Client::findAvalById((int)$loan['aval_id']) : null;
+        $guarantee    = DB::row("SELECT * FROM loan_guarantees WHERE loan_id = ? LIMIT 1", [(int)$id]);
+        $installments = Loan::getInstallments((int)$id);
 
         $this->render('documents/contrato', [
-            'title'     => 'Contrato · ' . $loan['loan_number'],
-            'loan'      => $loan,
-            'client'    => $client,
-            'aval'      => $aval,
-            'guarantee' => $guarantee,
+            'title'        => 'Contrato · ' . $loan['loan_number'],
+            'loan'         => $loan,
+            'client'       => $client,
+            'aval'         => $aval,
+            'guarantee'    => $guarantee,
+            'installments' => $installments,
         ], null);
     }
-
-    
 }

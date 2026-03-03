@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost:3306
--- Tiempo de generación: 02-03-2026 a las 06:43:23
--- Versión del servidor: 10.6.24-MariaDB-cll-lve
--- Versión de PHP: 8.3.30
+-- Servidor: localhost
+-- Tiempo de generación: 03-03-2026 a las 19:41:47
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -52,7 +52,10 @@ INSERT INTO `audit_log` (`id`, `user_id`, `action`, `entity`, `entity_id`, `old_
 (5, 1, 'create', 'loans', 1, NULL, NULL, '::1', NULL, '2026-03-01 20:43:06'),
 (6, 1, 'create', 'loans', 2, NULL, NULL, '::1', NULL, '2026-03-01 21:17:28'),
 (7, 1, 'create', 'loans', 3, NULL, NULL, '::1', NULL, '2026-03-01 22:01:45'),
-(8, 2, 'create', 'clients', 1, NULL, '{\"first_name\":\"Danny Sino\\u00e9\",\"last_name\":\"Vel\\u00e1squez Cadenas\"}', '190.242.27.159', NULL, '2026-03-01 21:46:16');
+(8, 1, 'create', 'loans', 4, NULL, NULL, '::1', NULL, '2026-03-02 16:17:31'),
+(9, 1, 'create', 'loans', 5, NULL, NULL, '::1', NULL, '2026-03-02 20:52:11'),
+(10, 1, 'create', 'loans', 6, NULL, NULL, '::1', NULL, '2026-03-02 21:47:20'),
+(11, 1, 'create', 'loans', 7, NULL, NULL, '::1', NULL, '2026-03-02 22:01:50');
 
 -- --------------------------------------------------------
 
@@ -79,6 +82,13 @@ CREATE TABLE `avales` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `avales`
+--
+
+INSERT INTO `avales` (`id`, `client_id`, `aval_client_id`, `full_name`, `identity_number`, `phone`, `phone2`, `address`, `city`, `occupation`, `nationality`, `relationship`, `identity_front_path`, `identity_back_path`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 4, NULL, 'MARIA BAIRES MONDRAGON', '0318199000543', '+50433758070', '', 'Barrio Macaruya, Siguatepeque', 'Siguatepequie', 'Ing. Agronoma', 'Hondureña', 'Esposa', 'storage/identities/avales/aval_identity_front_69a4f91baf8b86.78523095.png', 'storage/identities/avales/aval_identity_back_69a4f91bb57ba8.94555796.png', '', '2026-03-02 02:34:55', '2026-03-02 02:42:35');
 
 -- --------------------------------------------------------
 
@@ -130,7 +140,10 @@ CREATE TABLE `clients` (
 --
 
 INSERT INTO `clients` (`id`, `user_id`, `assigned_to`, `code`, `first_name`, `last_name`, `identity_number`, `email`, `phone`, `phone2`, `work_phone`, `nationality`, `profession`, `marital_status`, `spouse_name`, `spouse_phone`, `spouse_identity`, `ref_personal_name`, `ref_personal_phone`, `ref_personal_rel`, `ref_labor_name`, `ref_labor_phone`, `ref_labor_company`, `identity_front_path`, `identity_back_path`, `address`, `city`, `occupation`, `monthly_income`, `reference_name`, `reference_phone`, `notes`, `is_active`, `created_by`, `created_at`, `updated_at`) VALUES
-(1, NULL, NULL, 'CLI-00001', 'Danny Sinoé', 'Velásquez Cadenas', '0801918907280', 'sinoeproducciones@gmail.com', '+50431828143', '', '', 'Hondureña', 'Ing. En Sistemas', 'soltero', NULL, NULL, NULL, '', '', '', '', '', 'Naranja y Media Honduras', 'storage/identities/clients/identity_front_69a516182cd274.45833648.png', 'storage/identities/clients/identity_back_69a51618373e38.26266971.png', 'Barrio Macaruya', 'Siguatepeque', 'Ing. En Sistemas', 24000.00, '', '', '', 1, 2, '2026-03-01 21:46:16', '2026-03-01 21:46:16');
+(1, NULL, NULL, 'CLI-00001', 'Juan', 'Pérez López', '0801-1990-12345', 'juan@demo.hn', '+504 9811-1111', NULL, NULL, 'Hondureña', NULL, 'soltero', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Col. Kennedy, Casa #5', 'Tegucigalpa', NULL, NULL, NULL, NULL, NULL, 1, 1, '2026-02-26 20:30:08', '2026-02-26 20:30:08'),
+(2, NULL, NULL, 'CLI-00002', 'María', 'García Sánchez', '0801-1985-67890', 'maria@demo.hn', '+504 9822-2222', NULL, NULL, 'Hondureña', NULL, 'soltero', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Bo. El Centro', 'San Pedro Sula', NULL, NULL, NULL, NULL, NULL, 1, 1, '2026-02-26 20:30:08', '2026-02-26 20:30:08'),
+(3, NULL, NULL, 'CLI-00003', 'Carlos', 'Martínez Ruiz', '0801-1978-11122', NULL, '+504 9833-3333', NULL, NULL, 'Hondureña', NULL, 'soltero', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Col. Palmira', 'Tegucigalpa', NULL, NULL, NULL, NULL, NULL, 1, 1, '2026-02-26 20:30:08', '2026-02-26 20:30:08'),
+(4, NULL, 1, 'CLI-00004', 'Danny Sinoé', 'Velásquez Cadenas', '0801198907280', 'sinoeproducciones@gmail.com', '+50431828143', '', '', 'Hondureña', 'Ing. En Sistemas', 'casado', 'María José Bares', '+50433758070', '0318199000543', 'Gary Velasquez', '+50431828143', 'Hermano', '', '', 'Naranja y Media Honduras', 'storage/identities/clients/identity_front_69a4f91ba36d66.84972571.png', 'storage/identities/clients/identity_back_69a4f91baa97f4.17748155.png', 'Barrio Macaruya', 'Siguatepeque', 'Ing. En Sistemas', 24000.00, 'Gary Velasquez', '+50431828143', '', 1, 1, '2026-03-01 20:34:55', '2026-03-01 20:42:35');
 
 -- --------------------------------------------------------
 
@@ -211,11 +224,23 @@ CREATE TABLE `loans` (
   `total_paid` decimal(14,2) NOT NULL DEFAULT 0.00,
   `apply_payment_to` enum('capital','interest_first') NOT NULL DEFAULT 'interest_first',
   `notes` text DEFAULT NULL,
+  `payment_method_cash` tinyint(1) DEFAULT 1,
+  `payment_method_transfer` tinyint(1) DEFAULT 0,
+  `payment_method_check` tinyint(1) DEFAULT 0,
+  `payment_method_atm` tinyint(1) DEFAULT 0,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `payment_method` varchar(20) NOT NULL DEFAULT 'cash' COMMENT 'cash | transfer | deposit',
-  `payment_location` varchar(255) DEFAULT NULL COMMENT 'Dirección u datos de cuenta bancaria para el pago'
+  `payment_location` varchar(255) DEFAULT NULL COMMENT 'Dirección u datos de cuenta bancaria para el pago',
+  `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `loans`
+--
+
+INSERT INTO `loans` (`id`, `client_id`, `aval_id`, `has_guarantee`, `assigned_to`, `created_by`, `loan_number`, `loan_type`, `principal`, `interest_rate`, `rate_type`, `term_months`, `payment_frequency`, `late_fee_rate`, `grace_days`, `disbursement_date`, `first_payment_date`, `last_payment_date`, `maturity_date`, `status`, `balance`, `total_interest_paid`, `total_late_fees_paid`, `total_paid`, `apply_payment_to`, `notes`, `payment_method_cash`, `payment_method_transfer`, `payment_method_check`, `payment_method_atm`, `created_at`, `updated_at`, `payment_method`, `payment_location`, `deleted_at`) VALUES
+(7, 4, NULL, 0, 1, 1, 'PRES-000001', 'A', 5000.00, 0.1500, 'monthly', 3, 'monthly', 0.0000, 3, '2026-03-02', '2026-04-02', NULL, '2026-06-02', 'active', 5000.00, 0.00, 0.00, 0.00, 'interest_first', NULL, 0, 1, 0, 0, '2026-03-02 22:01:50', '2026-03-02 22:01:50', 'cash', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -232,6 +257,13 @@ CREATE TABLE `loan_events` (
   `meta` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`meta`)),
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `loan_events`
+--
+
+INSERT INTO `loan_events` (`id`, `loan_id`, `user_id`, `event_type`, `description`, `meta`, `created_at`) VALUES
+(13, 7, 1, 'created', 'Préstamo creado. Monto: 5000 · Tipo: A', '{\"installments\":[{\"installment_number\":1,\"due_date\":\"2026-04-02\",\"principal_amount\":1439.8800000000001091393642127513885498046875,\"interest_amount\":750,\"total_amount\":2189.8800000000001091393642127513885498046875,\"balance_after\":3560.1199999999998908606357872486114501953125,\"paid_amount\":0,\"paid_principal\":0,\"paid_interest\":0,\"paid_late_fee\":0,\"late_fee\":0,\"days_late\":0,\"status\":\"pending\"},{\"installment_number\":2,\"due_date\":\"2026-05-02\",\"principal_amount\":1655.859999999999899955582804977893829345703125,\"interest_amount\":534.01999999999998181010596454143524169921875,\"total_amount\":2189.8800000000001091393642127513885498046875,\"balance_after\":1904.259999999999990905052982270717620849609375,\"paid_amount\":0,\"paid_principal\":0,\"paid_interest\":0,\"paid_late_fee\":0,\"late_fee\":0,\"days_late\":0,\"status\":\"pending\"},{\"installment_number\":3,\"due_date\":\"2026-06-02\",\"principal_amount\":1904.259999999999990905052982270717620849609375,\"interest_amount\":285.6399999999999863575794734060764312744140625,\"total_amount\":2189.90000000000009094947017729282379150390625,\"balance_after\":0,\"paid_amount\":0,\"paid_principal\":0,\"paid_interest\":0,\"paid_late_fee\":0,\"late_fee\":0,\"days_late\":0,\"status\":\"pending\"}],\"monthly_payment\":2189.8800000000001091393642127513885498046875,\"total_interest\":1569.660000000000081854523159563541412353515625,\"total_payment\":6569.65999999999985448084771633148193359375,\"monthly_rate\":0.1499999999999999944488848768742172978818416595458984375,\"period_rate\":0.1499999999999999944488848768742172978818416595458984375,\"annual_rate\":1.79999999999999982236431605997495353221893310546875,\"frequency\":\"monthly\"}', '2026-03-02 22:01:50');
 
 -- --------------------------------------------------------
 
@@ -280,6 +312,15 @@ CREATE TABLE `loan_installments` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `loan_installments`
+--
+
+INSERT INTO `loan_installments` (`id`, `loan_id`, `installment_number`, `due_date`, `principal_amount`, `interest_amount`, `total_amount`, `paid_amount`, `paid_principal`, `paid_interest`, `paid_late_fee`, `balance_after`, `status`, `paid_date`, `late_fee`, `days_late`, `created_at`, `updated_at`) VALUES
+(13, 7, 1, '2026-04-02', 1439.88, 750.00, 2189.88, 0.00, 0.00, 0.00, 0.00, 3560.12, 'pending', NULL, 0.00, 0, '2026-03-02 22:01:50', '2026-03-02 22:01:50'),
+(14, 7, 2, '2026-05-02', 1655.86, 534.02, 2189.88, 0.00, 0.00, 0.00, 0.00, 1904.26, 'pending', NULL, 0.00, 0, '2026-03-02 22:01:50', '2026-03-02 22:01:50'),
+(15, 7, 3, '2026-06-02', 1904.26, 285.64, 2189.90, 0.00, 0.00, 0.00, 0.00, 0.00, 'pending', NULL, 0.00, 0, '2026-03-02 22:01:50', '2026-03-02 22:01:50');
 
 -- --------------------------------------------------------
 
@@ -387,9 +428,31 @@ INSERT INTO `settings` (`id`, `setting_key`, `setting_value`, `setting_type`, `d
 (49, 'company_rep_name', 'GARY ANTHONY VELASQUEZ CADENAS', 'string', 'Nombre del Representante Legal / Apoderado', 'documents', 1, '2026-03-01 15:32:16'),
 (50, 'company_rep_identity', '0801199015117', 'string', 'No. Identidad del Representante', 'documents', 1, '2026-03-01 15:32:16'),
 (51, 'company_rep_nationality', 'Hondureña', 'string', 'Nacionalidad del Representante', 'documents', 1, '2026-03-01 15:32:16'),
-(52, 'pagare_jurisdiction', 'Juzgado de Letras de lo Civil', 'string', 'Jurisdicción del Pagaré', 'documents', 1, '2026-03-01 15:32:16'),
-(53, 'pagare_city', 'Siguatepeque', 'string', 'Ciudad donde se firma el Pagaré', 'documents', 1, '2026-03-01 15:32:16'),
-(54, 'aval_required_amount', '10000', 'decimal', 'Monto mínimo que requiere aval (L)', 'loans', 1, '2026-03-01 15:32:16');
+(52, 'pagare_jurisdiction', 'Juzgado de Letras de lo Civil', 'string', 'Jurisdicción competente para pagarés', 'documents', 1, '2026-03-03 12:38:15'),
+(53, 'pagare_city', '', 'string', 'Ciudad para firmar pagaré (vacío = usa company_city)', 'documents', 1, '2026-03-03 12:38:15'),
+(54, 'aval_required_amount', '10000', 'decimal', 'Monto mínimo que requiere aval (L)', 'loans', 1, '2026-03-01 15:32:16'),
+(131, 'bank_name_1', '', 'string', 'Nombre del banco 1', 'general', 1, '2026-03-03 12:38:15'),
+(132, 'bank_account_1', '', 'string', 'Número de cuenta banco 1', 'general', 1, '2026-03-03 12:38:15'),
+(133, 'bank_account_type_1', 'checking', 'string', 'Tipo de cuenta (checking, savings)', 'general', 1, '2026-03-03 12:38:15'),
+(134, 'bank_account_holder_1', '', 'string', 'Titular de la cuenta 1', 'general', 1, '2026-03-03 12:38:15'),
+(135, 'bank_account_iban_1', '', 'string', 'IBAN cuenta 1 (opcional)', 'general', 1, '2026-03-03 12:38:15'),
+(136, 'bank_name_2', '', 'string', 'Nombre del banco 2', 'general', 1, '2026-03-03 12:38:16'),
+(137, 'bank_account_2', '', 'string', 'Número de cuenta banco 2', 'general', 1, '2026-03-03 12:38:16'),
+(138, 'bank_account_type_2', 'savings', 'string', 'Tipo de cuenta (checking, savings)', 'general', 1, '2026-03-03 12:38:16'),
+(139, 'bank_account_holder_2', '', 'string', 'Titular de la cuenta 2', 'general', 1, '2026-03-03 12:38:16'),
+(140, 'bank_account_iban_2', '', 'string', 'IBAN cuenta 2 (opcional)', 'general', 1, '2026-03-03 12:38:16'),
+(141, 'bank_name_3', '', 'string', 'Nombre del banco 3', 'general', 1, '2026-03-03 12:38:16'),
+(142, 'bank_account_3', '', 'string', 'Número de cuenta banco 3', 'general', 1, '2026-03-03 12:38:16'),
+(143, 'bank_account_type_3', 'checking', 'string', 'Tipo de cuenta (checking, savings)', 'general', 1, '2026-03-03 12:38:16'),
+(144, 'bank_account_holder_3', '', 'string', 'Titular de la cuenta 3', 'general', 1, '2026-03-03 12:38:16'),
+(145, 'bank_account_iban_3', '', 'string', 'IBAN cuenta 3 (opcional)', 'general', 1, '2026-03-03 12:38:16'),
+(146, 'contract_page_size', 'letter', 'string', 'Tamaño de página para contrato (letter, legal, a4)', 'documents', NULL, '2026-03-03 12:38:15'),
+(147, 'contract_margin_top', '1.5cm', 'string', 'Margen superior del contrato', 'documents', NULL, '2026-03-03 12:38:15'),
+(148, 'contract_margin_right', '2cm', 'string', 'Margen derecho/izquierdo del contrato', 'documents', NULL, '2026-03-03 12:38:15'),
+(149, 'contract_jurisdiction', 'Juzgado de Letras de lo Civil', 'string', 'Jurisdicción competente para contratos', 'documents', NULL, '2026-03-03 12:38:15'),
+(150, 'pagare_page_size', 'letter', 'string', 'Tamaño de página para pagaré (letter, legal, a4)', 'documents', NULL, '2026-03-03 12:38:15'),
+(151, 'pagare_margin_top', '1.5cm', 'string', 'Margen superior del pagaré', 'documents', NULL, '2026-03-03 12:38:15'),
+(152, 'pagare_margin_right', '2cm', 'string', 'Margen derecho/izquierdo del pagaré', 'documents', NULL, '2026-03-03 12:38:15');
 
 -- --------------------------------------------------------
 
@@ -419,8 +482,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `role_id`, `name`, `email`, `password`, `phone`, `avatar`, `is_active`, `remember_token`, `password_reset_token`, `password_reset_expires`, `last_login`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Super Administrador', 'superadmin@pistofacil.com', '$2y$10$EIUlqL8jgIkyukumJNRUhe2akfSztxrBATrAi6cZXKKf0Yf2jjD.S', '+504 9999-0000', NULL, 1, NULL, NULL, NULL, '2026-03-01 23:57:59', '2026-02-26 20:30:08', '2026-03-01 22:57:59'),
-(2, 1, 'Gary Velásquez Cadenas', 'gvelasquez@pistofacil.com', '$2y$12$Drqvi4W8PrcRCGQd8Su1uuWVW2/Bd93FmisbPjhBEwwTqFeZzcknu', '+504 9999-0001', NULL, 1, NULL, NULL, NULL, '2026-03-01 22:39:06', '2026-02-26 20:30:08', '2026-03-01 21:39:06'),
+(1, 1, 'Super Administrador', 'superadmin@pistofacil.com', '$2y$10$EIUlqL8jgIkyukumJNRUhe2akfSztxrBATrAi6cZXKKf0Yf2jjD.S', '+504 9999-0000', NULL, 1, NULL, NULL, NULL, '2026-03-03 12:38:32', '2026-02-26 20:30:08', '2026-03-03 12:38:32'),
+(2, 2, 'Admin Demo', 'admin@pistofacil.com', '$2y$10$zsgnRT18MCpBk2ps6pHxqeBZrjgAaKfiy6zt1c7AvO2RNx0p2q/iq', '+504 9999-0001', NULL, 1, NULL, NULL, NULL, NULL, '2026-02-26 20:30:08', '2026-02-26 21:19:18'),
 (3, 3, 'Asesor Demo', 'asesor@pistofacil.com', '$2y$10$zsgnRT18MCpBk2ps6pHxqeBZrjgAaKfiy6zt1c7AvO2RNx0p2q/iq', '+504 9999-0002', NULL, 1, NULL, NULL, NULL, NULL, '2026-02-26 20:30:08', '2026-02-26 21:19:19');
 
 --
@@ -555,7 +618,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `avales`
@@ -567,7 +630,7 @@ ALTER TABLE `avales`
 -- AUTO_INCREMENT de la tabla `clients`
 --
 ALTER TABLE `clients`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `client_documents`
@@ -585,13 +648,13 @@ ALTER TABLE `contract_templates`
 -- AUTO_INCREMENT de la tabla `loans`
 --
 ALTER TABLE `loans`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `loan_events`
 --
 ALTER TABLE `loan_events`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `loan_guarantees`
@@ -603,7 +666,7 @@ ALTER TABLE `loan_guarantees`
 -- AUTO_INCREMENT de la tabla `loan_installments`
 --
 ALTER TABLE `loan_installments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `payments`
@@ -627,7 +690,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `settings`
 --
 ALTER TABLE `settings`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=170;
 
 --
 -- AUTO_INCREMENT de la tabla `users`

@@ -1,3 +1,18 @@
+<?php
+/**
+ * VISTA: views/documents/contrato.php
+ * Contrato de Préstamo - VERSIÓN PROFESIONAL
+ * 
+ * Características:
+ * - Diseño profesional sin colores innecesarios
+ * - Configuración de página CARTA o LEGAL
+ * - Márgenes ajustables por settings
+ * - Cláusula de protección de firma
+ * - Monto total a pagar incluido
+ * - Tabla de amortización como anexo
+ * - Cuentas bancarias en Anexo II
+ */
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -16,24 +31,139 @@
       font-size: 11.5pt;
       color: #000;
       background: #fff;
+      line-height: 1.6;
     }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /* ESCALADO AUTOMÁTICO POR TAMAÑO DE PÁGINA */
+    /* ═══════════════════════════════════════════════════════════ */
+    <?php 
+      $pageSize = setting('contract_page_size', 'letter');
+      if ($pageSize === 'letter'): 
+    ?>
+      /* LETTER: 8.5" x 11" - REDUCE LETRA 8% PARA FIRMAS */
+      body { 
+        font-size: 10.6pt; 
+      }
+      h1 { 
+        font-size: 12.88pt; 
+      }
+      h2 { 
+        font-size: 11.04pt; 
+      }
+      .clause-title { 
+        font-size: 10.58pt; 
+      }
+      .subtitle {
+        font-size: 9.2pt;
+      }
+      p { 
+        margin-bottom: 8px; 
+      }
+      table.datos { 
+        font-size: 9.66pt; 
+      }
+      table.datos td {
+        padding: 5px 6px;
+      }
+      table.amortizacion { 
+        font-size: 8.7pt; 
+      }
+      table.amortizacion th { 
+        padding: 5px 3px; 
+      }
+      table.amortizacion td { 
+        padding: 3px 4px; 
+      }
+      .info-box { 
+        padding: 9px 10px; 
+        margin: 8px 0; 
+        font-size: 9.66pt;
+      }
+      .info-box li {
+        margin: 3px 0;
+      }
+      .banco-item {
+        margin: 6px 0;
+        padding: 6px 0;
+        font-size: 9.66pt;
+      }
+      .firmas {
+        margin-top: 60px;
+      }
+      .firma-line {
+        margin-top: 50px;
+      }
+      .firma-label {
+        font-size: 9pt;
+      }
+      .firma-info {
+        font-size: 9pt;
+      }
+      .huella-box {
+        width: 60px;
+        height: 60px;
+      }
+      .huella-label {
+        font-size: 7.5pt;
+      }
+      .identity-img {
+        max-width: 150px;
+      }
+    <?php elseif ($pageSize === 'legal'): ?>
+      /* LEGAL: 8.5" x 14" - MANTIENE TAMAÑO NORMAL */
+      /* Sin cambios */
+    <?php elseif ($pageSize === 'a4'): ?>
+      /* A4: 210mm x 297mm - REDUCE LETRA 5% */
+      body { 
+        font-size: 10.93pt; 
+      }
+      h1 { 
+        font-size: 13.3pt; 
+      }
+      h2 { 
+        font-size: 11.4pt; 
+      }
+      .clause-title { 
+        font-size: 10.93pt; 
+      }
+      .subtitle {
+        font-size: 9.5pt;
+      }
+      table.datos { 
+        font-size: 10pt; 
+      }
+      table.amortizacion { 
+        font-size: 9pt; 
+      }
+      .info-box { 
+        font-size: 10pt;
+      }
+    <?php endif; ?>
 
     @media screen {
       body {
-        padding: 2cm 2.5cm;
+        padding: <?= setting('contract_margin_top', '2cm') ?> <?= setting('contract_margin_right', '2.5cm') ?>;
+        background: #f5f5f5;
       }
     }
 
+    .page {
+      background: white;
+      margin-bottom: 20px;
+      padding: <?= setting('contract_margin_top', '2cm') ?> <?= setting('contract_margin_right', '2.5cm') ?>;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
     h1 {
-      font-size: 14pt;
       text-align: center;
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 4px;
+      font-weight: bold;
     }
 
     h2 {
-      font-size: 12pt;
       text-align: center;
       margin-bottom: 18px;
       font-style: italic;
@@ -41,34 +171,33 @@
 
     .subtitle {
       text-align: center;
-      font-size: 10pt;
       color: #444;
       margin-bottom: 20px;
+      border-bottom: 1px solid #999;
+      padding-bottom: 10px;
     }
 
     .clause-title {
-      font-size: 11.5pt;
       font-weight: bold;
       text-transform: uppercase;
-      margin: 16px 0 6px;
+      margin: 16px 0 8px;
+      color: #000;
     }
 
     p {
       text-align: justify;
       line-height: 1.7;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     table.datos {
       width: 100%;
       border-collapse: collapse;
-      margin: 10px 0;
-      font-size: 10.5pt;
+      margin: 12px 0;
     }
 
     table.datos td {
-      padding: 5px 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #999;
     }
 
     table.datos td:first-child {
@@ -77,8 +206,63 @@
       background: #f9f9f9;
     }
 
+    table.amortizacion {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+    }
+
+    table.amortizacion th {
+      background: #f0f0f0;
+      color: #000;
+      text-align: center;
+      font-weight: bold;
+      border: 1px solid #999;
+    }
+
+    table.amortizacion td {
+      border: 1px solid #ddd;
+      text-align: right;
+    }
+
+    table.amortizacion td:first-child {
+      text-align: center;
+    }
+
+    table.amortizacion tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    .info-box {
+      border: 1px solid #999;
+      padding: 10px 12px;
+      margin: 10px 0;
+      border-radius: 0;
+      background: #fff;
+    }
+
+    .info-box ul {
+      margin: 6px 0 0 20px;
+      padding: 0;
+    }
+
+    .info-box li {
+      margin: 4px 0;
+    }
+
+    .banco-item {
+      margin: 8px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .banco-item:last-child {
+      border-bottom: none;
+    }
+
     .firmas {
-      margin-top: 60px;
+      margin-top: 80px;
+      page-break-inside: avoid;
     }
 
     .firmas-row {
@@ -94,82 +278,79 @@
 
     .firma-line {
       border-top: 1px solid #000;
-      margin-top: 60px;
+      margin-top: 70px;
       margin-bottom: 6px;
     }
 
     .firma-label {
-      font-size: 10pt;
+      font-weight: bold;
     }
 
-    /* ── HUELLA: caja vacía + etiqueta DEBAJO ── */
+    .firma-info {
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
     .huella-wrap {
       display: inline-block;
       text-align: center;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .huella-box {
-      width: 80px;
-      height: 80px;
       border: 1px dashed #666;
       display: block;
     }
 
     .huella-label {
-      font-size: 8pt;
       color: #555;
       margin-top: 3px;
     }
 
-    .garantia-box {
-      border: 1px solid #dc2626;
-      padding: 12px 16px;
-      border-radius: 4px;
-      margin: 10px 0;
-      background: #fff5f5;
-    }
-
-    .aval-box {
-      border: 1px solid #d97706;
-      padding: 12px 16px;
-      border-radius: 4px;
-      margin: 10px 0;
-      background: #fffbeb;
-    }
-
     .identity-img {
-      max-width: 220px;
-      border: 1px solid #ccc;
+      border: 1px solid #999;
       margin: 6px 4px;
-      border-radius: 4px;
+      border-radius: 0;
     }
 
-    .identity-section {
-      margin-top: 8px;
+    .identity-grid {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
     }
 
-    .page-break {
-      page-break-before: always;
+    .identity-card {
+      width: 50%;
     }
 
     @media print {
       body {
-        padding: 1.5cm 2cm;
+        padding: 0;
+        background: white;
+      }
+
+      .page {
+        margin: 0;
+        padding: <?= setting('contract_margin_top', '1.5cm') ?> <?= setting('contract_margin_right', '2cm') ?>;
+        box-shadow: none;
+        page-break-after: always;
       }
 
       .no-print {
         display: none !important;
       }
 
-      .identity-page {
-        padding-top: 4cm;
-        /* mismo valor */
+      @page {
+        size: <?= setting('contract_page_size', 'letter') ?>;
+        margin: <?= setting('contract_margin_top', '1.5cm') ?>;
       }
 
-      @page {
-        size: legal;
-        margin: 1.5cm;
+      .page-break {
+        page-break-before: always;
+      }
+
+      .avoid-break {
+        page-break-inside: avoid;
       }
     }
 
@@ -187,86 +368,16 @@
       z-index: 999;
     }
 
-    .identity-page {
-      padding-top: 2cm;
-      /* ajusta: 0.8cm / 1cm / 1.5cm */
+    .no-print {
+      margin: 20px 0;
     }
 
-    /* Página exclusiva para el anexo */
-    .identity-page {
-      page-break-before: always;
-      break-before: page;
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-
-    /* Evita cortes internos */
-    .identity-section,
-    .identity-grid,
-    .identity-card {
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-
-    /* Layout: dos columnas (frente / reverso) para que quepa */
-    .identity-grid {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .identity-card {
-      width: 50%;
-    }
-
-    /* Imagen: que SIEMPRE quepa en una hoja oficio */
-    .identity-img {
-      width: 100%;
-      max-height: 18cm;
-      /* <-- ajusta si deseas más/menos grande */
-      object-fit: contain;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      margin: 6px 0;
-    }
-
-    .identity-page.has-aval .identity-img {
-      max-height: 8.5cm;
-      /* ajusta: 8cm / 9cm / 10cm */
-    }
-
-    .identity-label {
-      font-size: 9pt;
-      color: #555;
-      margin-bottom: 4px;
-    }
-
-    /* ── Control de saltos de página ───────────────────────── */
     .page-break-before {
-      break-before: page;
       page-break-before: always;
-      /* compatibilidad */
     }
 
     .avoid-break {
-      break-inside: avoid;
       page-break-inside: avoid;
-    }
-
-    /* Firmas: evitar que se partan */
-    .firmas,
-    .firmas-row,
-    .aval-box,
-    .garantia-box,
-    table.datos {
-      break-inside: avoid;
-      page-break-inside: avoid;
-    }
-
-    /* Si quieres “forzar” que aval vaya siempre a otra página */
-    .force-next-page {
-      break-before: page;
-      page-break-before: always;
     }
   </style>
 </head>
@@ -274,6 +385,8 @@
 <body>
 
   <?php
+  // ─── VARIABLES ────────────────────────────────────────────────────
+  
   $currency    = setting('app_currency', 'L');
   $companyName = setting('company_legal_name', setting('app_name', ''));
   $companyRTN  = setting('company_rtn', '');
@@ -283,28 +396,30 @@
   $repName     = setting('company_rep_name', '');
   $repIdentity = setting('company_rep_identity', '');
   $repNat      = setting('company_rep_nationality', 'Hondureña');
-  $jurisdiction = setting('pagare_jurisdiction', 'Juzgado de Letras de lo Civil');
-  $signCity    = setting('pagare_city', $companyCity);
+  $jurisdiction = setting('contract_jurisdiction', 'Juzgado de Letras de lo Civil');
 
   $client    = $client    ?? [];
   $loan      = $loan      ?? [];
   $aval      = $aval      ?? null;
   $guarantee = $guarantee ?? null;
+  $installments = isset($installments) ? $installments : [];
 
-  $clientName  = trim(($client['first_name'] ?? '') . ' ' . ($client['last_name'] ?? ''));
+  $clientName    = trim(($client['first_name'] ?? '') . ' ' . ($client['last_name'] ?? ''));
   $clientMarital = match ($client['marital_status'] ?? 'soltero') {
     'casado'     => 'Casado/a',
     'divorciado' => 'Divorciado/a',
     'viudo'      => 'Viudo/a',
     default      => 'Soltero/a',
   };
-  // Profesión: campo profession primero, luego occupation como fallback
-  $clientProf = trim($client['profession'] ?? '');
+  $clientProf  = trim($client['profession'] ?? '');
   if ($clientProf === '') $clientProf = trim($client['occupation'] ?? '');
-
-  // phone = celular, phone2 = teléfono fijo
   $clientCelular = $client['phone']  ?? '';
   $clientPhone2  = $client['phone2'] ?? '';
+  $clientNat     = $client['nationality'] ?? 'Hondureña';
+  $clientId      = $client['identity_number'] ?? '';
+  $clientAddr    = $client['address'] ?? '';
+  $clientCity    = $client['city'] ?? '';
+  $clientEmail   = $client['email'] ?? '';
 
   $loanType  = $loan['loan_type'] ?? 'A';
   $loanTypes = ['A' => 'Cuota Nivelada', 'B' => 'Variable Decreciente', 'C' => 'Interés Simple Mensual'];
@@ -316,12 +431,13 @@
   $lateFeeRate = number_format((float)($loan['late_fee_rate'] ?? 0) * 100, 2);
   $term        = $loan['term_months'] ?? 1;
   $freq        = match ($loan['payment_frequency'] ?? 'monthly') {
-    'weekly'      => 'Semanal',
-    'biweekly'    => 'Quincenal',
-    'monthly'     => 'Mensual',
-    'quarterly'   => 'Trimestral',
-    'semiannual'  => 'Semestral',
-    'annual'      => 'Anual',
+    'weekly'      => 'Semanal (7 días)',
+    'biweekly'    => 'Quincenal (15 días)',
+    'monthly'     => 'Mensual (30 días)',
+    'bimonthly'   => 'Bimensual (60 días)',
+    'quarterly'   => 'Trimestral (90 días)',
+    'semiannual'  => 'Semestral (180 días)',
+    'annual'      => 'Anual (365 días)',
     default       => 'Mensual',
   };
   $disbDate   = $loan['disbursement_date'] ? date('d/m/Y', strtotime($loan['disbursement_date'])) : '___/___/______';
@@ -329,442 +445,465 @@
   $maturity   = $loan['maturity_date'] ? date('d/m/Y', strtotime($loan['maturity_date'])) : '___/___/______';
   $graceDays  = $loan['grace_days'] ?? 0;
 
-  // ── FIX: strftime() deprecated → array manual en español ──────────────────
-  $spanishMonths = [
-    1 => 'ENERO',
-    2 => 'FEBRERO',
-    3 => 'MARZO',
-    4 => 'ABRIL',
-    5 => 'MAYO',
-    6 => 'JUNIO',
-    7 => 'JULIO',
-    8 => 'AGOSTO',
-    9 => 'SEPTIEMBRE',
-    10 => 'OCTUBRE',
-    11 => 'NOVIEMBRE',
-    12 => 'DICIEMBRE'
-  ];
+  // Totales
+  $totalPrincipal = array_sum(array_column($installments, 'principal_amount'));
+  $totalInterest = array_sum(array_column($installments, 'interest_amount'));
+  $totalPay = $totalPrincipal + $totalInterest;
+  $totalPayFmt = number_format($totalPay, 2);
+
+  // Meses en español
+  $spanishMonths = [1=>'ENERO',2=>'FEBRERO',3=>'MARZO',4=>'ABRIL',5=>'MAYO',6=>'JUNIO',
+                     7=>'JULIO',8=>'AGOSTO',9=>'SEPTIEMBRE',10=>'OCTUBRE',11=>'NOVIEMBRE',12=>'DICIEMBRE'];
   $today    = date('d');
   $month    = $spanishMonths[(int)date('n')];
   $year     = date('Y');
 
-  // Método de pago
-  $payMethod      = $loan['payment_method'] ?? 'cash';
-  $payLocation    = $loan['payment_location'] ?? $companyAddr;
-  $payMethodLabel = match ($payMethod) {
-    'transfer' => 'Transferencia bancaria',
-    'deposit'  => 'Depósito en cuenta',
-    default    => 'Efectivo en caja',
-  };
+  // Métodos de pago
+  $payMethods = [
+    'cash'     => !empty($loan['payment_method_cash']),
+    'transfer' => !empty($loan['payment_method_transfer']),
+    'check'    => !empty($loan['payment_method_check']),
+    'atm'      => !empty($loan['payment_method_atm']),
+  ];
 
-  // Imágenes de identidad del cliente (rutas relativas desde webroot)
+  // Cuentas bancarias
+  $bankAccounts = array_filter([
+    setting('bank_name_1') ? ['bank' => setting('bank_name_1'), 'account' => setting('bank_account_1'), 
+                               'holder' => setting('bank_account_holder_1'), 'type' => setting('bank_account_type_1')] : null,
+    setting('bank_name_2') ? ['bank' => setting('bank_name_2'), 'account' => setting('bank_account_2'),
+                               'holder' => setting('bank_account_holder_2'), 'type' => setting('bank_account_type_2')] : null,
+    setting('bank_name_3') ? ['bank' => setting('bank_name_3'), 'account' => setting('bank_account_3'),
+                               'holder' => setting('bank_account_holder_3'), 'type' => setting('bank_account_type_3')] : null,
+  ]);
+
+  // Imágenes de identidad
   $identityFront = $client['identity_front_path'] ?? null;
   $identityBack  = $client['identity_back_path']  ?? null;
+  $avalFront = $aval['identity_front_path'] ?? $aval['aval_identity_front_path'] ?? null;
+  $avalBack  = $aval['identity_back_path']  ?? $aval['aval_identity_back_path'] ?? null;
 
-  // Imágenes de identidad del AVAL (compatibles con distintos nombres de llave)
-  $avalFront = $aval['identity_front_path']
-    ?? $aval['aval_identity_front_path']
-    ?? null;
-
-  $avalBack  = $aval['identity_back_path']
-    ?? $aval['aval_identity_back_path']
-    ?? null;
-
-  // Número a palabras
-  function numWords2(float $a): string
-  {
-    return numToWords2((int)$a);
-  }
-  function numToWords2(int $n): string
-  {
+  // Helper: número a palabras
+  function numToWords(int $n): string {
     if ($n === 0) return 'CERO';
-    $ones = [
-      '',
-      'UNO',
-      'DOS',
-      'TRES',
-      'CUATRO',
-      'CINCO',
-      'SEIS',
-      'SIETE',
-      'OCHO',
-      'NUEVE',
-      'DIEZ',
-      'ONCE',
-      'DOCE',
-      'TRECE',
-      'CATORCE',
-      'QUINCE',
-      'DIECISÉIS',
-      'DIECISIETE',
-      'DIECIOCHO',
-      'DIECINUEVE'
-    ];
-    $tens = ['', '', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
-    $hunds = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+    $ones = ['','UNO','DOS','TRES','CUATRO','CINCO','SEIS','SIETE','OCHO','NUEVE','DIEZ',
+             'ONCE','DOCE','TRECE','CATORCE','QUINCE','DIECISÉIS','DIECISIETE','DIECIOCHO','DIECINUEVE'];
+    $tens = ['','','VEINTE','TREINTA','CUARENTA','CINCUENTA','SESENTA','SETENTA','OCHENTA','NOVENTA'];
+    $hundreds = ['','CIENTO','DOSCIENTOS','TRESCIENTOS','CUATROCIENTOS','QUINIENTOS','SEISCIENTOS','SETECIENTOS','OCHOCIENTOS','NOVECIENTOS'];
     if ($n < 20) return $ones[$n];
     if ($n < 100) return $tens[intdiv($n, 10)] . ($n % 10 ? ' Y ' . $ones[$n % 10] : '');
     if ($n === 100) return 'CIEN';
-    if ($n < 1000) return $hunds[intdiv($n, 100)] . ($n % 100 ? ' ' . numToWords2($n % 100) : '');
-    if ($n < 2000) return 'MIL' . ($n % 1000 ? ' ' . numToWords2($n % 1000) : '');
-    if ($n < 1000000) return numToWords2(intdiv($n, 1000)) . ' MIL' . ($n % 1000 ? ' ' . numToWords2($n % 1000) : '');
-    return numToWords2(intdiv($n, 1000000)) . ' MILLONES' . ($n % 1000000 ? ' ' . numToWords2($n % 1000000) : '');
+    if ($n < 1000) return $hundreds[intdiv($n, 100)] . ($n % 100 ? ' ' . numToWords($n % 100) : '');
+    if ($n < 2000) return 'MIL' . ($n % 1000 ? ' ' . numToWords($n % 1000) : '');
+    if ($n < 1000000) return numToWords(intdiv($n, 1000)) . ' MIL' . ($n % 1000 ? ' ' . numToWords($n % 1000) : '');
+    return numToWords(intdiv($n, 1000000)) . ' MILLONES' . ($n % 1000000 ? ' ' . numToWords($n % 1000000) : '');
   }
   ?>
 
   <button class="print-btn no-print" onclick="window.print()">🖨 Imprimir Contrato</button>
 
-  <h1>Contrato de Préstamo</h1>
-  <h2><?= htmlspecialchars($companyName) ?></h2>
-  <div class="subtitle">
-    No. Contrato / Préstamo: <strong><?= htmlspecialchars($loan['loan_number'] ?? '') ?></strong> &nbsp;|&nbsp;
-    Fecha: <?= date('d/m/Y') ?>
-    <?php if ($companyRTN): ?>&nbsp;|&nbsp; RTN: <strong><?= htmlspecialchars($companyRTN) ?></strong><?php endif; ?>
-  </div>
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- PÁGINA 1: CONTRATO PRINCIPAL -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
 
-  <!-- I. PARTES -->
-  <div class="clause-title">I. Partes del Contrato</div>
-  <p>
-    <strong>PARTE PRESTAMISTA (EL ACREEDOR):</strong>
-    <?= htmlspecialchars($companyName ?: '___________________________________') ?>,
-    <?php if ($companyRTN): ?>con RTN <strong><?= htmlspecialchars($companyRTN) ?></strong>, <?php endif; ?>
-  con domicilio en <?= htmlspecialchars($companyAddr ?: '___________________________') ?>,
-  <?php if ($companyPhone): ?>teléfono: <?= htmlspecialchars($companyPhone) ?>,<?php endif; ?>
-  <?php if ($repName): ?>representada en este acto por <strong><?= htmlspecialchars($repName) ?></strong>,
-  mayor de edad, de nacionalidad <?= htmlspecialchars($repNat) ?>,
-  Tarjeta de Identidad No. <strong><?= htmlspecialchars($repIdentity) ?></strong>
-  (en adelante <strong>"EL PRESTAMISTA"</strong> o <strong>"EL ACREEDOR"</strong>);<?php else: ?>(en adelante <strong>"EL PRESTAMISTA"</strong>);<?php endif; ?>
-  </p>
-  <p>
-    <strong>PARTE PRESTATARIA (EL DEUDOR / CONTRATANTE):</strong>
-    <strong><?= htmlspecialchars($clientName) ?></strong>,
-    mayor de edad, estado civil: <strong><?= $clientMarital ?></strong>
-    <?php if (!empty($client['spouse_name'])): ?>
-      , cónyuge: <strong><?= htmlspecialchars($client['spouse_name']) ?></strong>
-      <?php if (!empty($client['spouse_identity'])): ?>(Identidad: <?= htmlspecialchars($client['spouse_identity']) ?>)<?php endif; ?>
+  <div class="page">
+    <h1>Contrato de Préstamo</h1>
+    <h2><?= e($companyName) ?></h2>
+    <div class="subtitle">
+      Número de Contrato: <strong><?= e($loan['loan_number'] ?? '') ?></strong> | 
+      Fecha: <?= date('d/m/Y') ?>
+      <?php if ($companyRTN): ?> | RTN: <strong><?= e($companyRTN) ?></strong><?php endif; ?>
+    </div>
+
+    <!-- I. PARTES -->
+    <div class="clause-title">I. Partes del Contrato</div>
+    <p>
+      <strong>PARTE PRESTAMISTA (ACREEDOR):</strong>
+      <?= e($companyName ?: '___________________________________') ?>,
+      <?php if ($companyRTN): ?>con RTN <strong><?= e($companyRTN) ?></strong>,<?php endif; ?>
+      con domicilio en <?= e($companyAddr ?: '___________________________') ?>,
+      <?php if ($companyPhone): ?>teléfono: <?= e($companyPhone) ?>,<?php endif; ?>
+      <?php if ($repName): ?>representada por <strong><?= e($repName) ?></strong>, 
+      <?= e($repNat) ?>, Tarjeta de Identidad No. <strong><?= e($repIdentity) ?></strong>
+      (en adelante <strong>"EL PRESTAMISTA"</strong>);<?php else: ?>(en adelante <strong>"EL PRESTAMISTA"</strong>);<?php endif; ?>
+    </p>
+    <p>
+      <strong>PARTE PRESTATARIA (DEUDOR):</strong>
+      <strong><?= e($clientName) ?></strong>, mayor de edad, estado civil: <strong><?= $clientMarital ?></strong>
+      <?php if (!empty($client['spouse_name'])): ?>, 
+      cónyuge: <strong><?= e($client['spouse_name']) ?></strong>
+      <?php if (!empty($client['spouse_identity'])): ?>(Identidad: <?= e($client['spouse_identity']) ?>)<?php endif; ?>
       <?php endif; ?>,
-      profesión u oficio: <strong><?= htmlspecialchars($clientProf ?: '___________') ?></strong>,
-      nacionalidad: <strong><?= htmlspecialchars($client['nationality'] ?? 'Hondureña') ?></strong>,
-      Tarjeta de Identidad No. <strong><?= htmlspecialchars($client['identity_number'] ?? '__________________________') ?></strong>,
-      domicilio: <strong><?= htmlspecialchars(trim(($client['address'] ?? '') . ' ' . ($client['city'] ?? '')) ?: '______________________________') ?></strong>,
-      celular: <strong><?= htmlspecialchars($clientCelular ?: '____________') ?></strong>
-      <?php if ($clientPhone2): ?>, teléfono fijo: <strong><?= htmlspecialchars($clientPhone2) ?></strong><?php endif; ?>
-    <?php if ($client['email'] ?? ''): ?>, correo: <strong><?= htmlspecialchars($client['email']) ?></strong><?php endif; ?>
-  (en adelante <strong>"EL DEUDOR"</strong> o <strong>"EL CONTRATANTE"</strong>).
-  </p>
+      profesión: <strong><?= e($clientProf ?: '___________') ?></strong>,
+      nacionalidad: <strong><?= e($clientNat) ?></strong>,
+      Tarjeta de Identidad: <strong><?= e($clientId ?: '__________________________') ?></strong>,
+      domicilio: <strong><?= e(trim($clientAddr . ' ' . $clientCity) ?: '______________________________') ?></strong>,
+      celular: <strong><?= e($clientCelular ?: '____________') ?></strong>
+      <?php if ($clientPhone2): ?>, teléfono: <strong><?= e($clientPhone2) ?></strong><?php endif; ?>
+      <?php if ($clientEmail): ?>, correo: <strong><?= e($clientEmail) ?></strong><?php endif; ?>
+      (en adelante <strong>"EL DEUDOR"</strong>).
+    </p>
 
-  <!-- II. OBJETO -->
-  <div class="clause-title">II. Objeto del Contrato</div>
-  <p>
-    EL PRESTAMISTA otorga a EL DEUDOR un préstamo personal por la cantidad de
-    <strong><?= strtoupper(numWords2($amount)) ?> LEMPIRAS EXACTOS
+    <!-- II. OBJETO -->
+    <div class="clause-title">II. Objeto del Contrato</div>
+    <p>
+      EL PRESTAMISTA otorga a EL DEUDOR un préstamo por la cantidad de
+      <strong><?= strtoupper(numToWords((int)$amount)) ?> LEMPIRAS EXACTOS
       (<?= $currency ?> <?= $amountFmt ?>)</strong>,
-    bajo la modalidad <strong><?= htmlspecialchars($loanTypeLabel) ?></strong>,
-    conforme a las condiciones establecidas en el presente instrumento.
-  </p>
+      bajo la modalidad <strong><?= e($loanTypeLabel) ?></strong>,
+      conforme a las condiciones establecidas en este contrato.
+    </p>
 
-  <!-- III. CONDICIONES FINANCIERAS -->
-  <div class="clause-title">III. Condiciones Financieras</div>
-  <table class="datos">
-    <tr>
-      <td>Monto del Préstamo</td>
-      <td><?= $currency ?> <?= $amountFmt ?></td>
-    </tr>
-    <tr>
-      <td>Tasa de Interés</td>
-      <td><?= $intRate ?>% mensual</td>
-    </tr>
-    <tr>
-      <td>Tasa por Mora</td>
-      <td><?= $lateFeeRate ?>% mensual sobre saldo</td>
-    </tr>
-    <tr>
-      <td>Modalidad</td>
-      <td><?= htmlspecialchars($loanTypeLabel) ?></td>
-    </tr>
-    <tr>
-      <td>Plazo</td>
-      <td><?= $term ?> cuota<?= $term > 1 ? 's' : '' ?></td>
-    </tr>
-    <tr>
-      <td>Frecuencia de Pago</td>
-      <td><?= $freq ?></td>
-    </tr>
-    <tr>
-      <td>Fecha de Desembolso</td>
-      <td><?= $disbDate ?></td>
-    </tr>
-    <tr>
-      <td>Fecha Primer Pago</td>
-      <td><?= $firstPay ?></td>
-    </tr>
-    <tr>
-      <td>Fecha de Vencimiento</td>
-      <td><?= $maturity ?></td>
-    </tr>
-    <tr>
-      <td>Días de Gracia</td>
-      <td><?= $graceDays ?> días</td>
-    </tr>
-    <tr>
-      <td>Forma de Pago</td>
-      <td><?= htmlspecialchars($payMethodLabel) ?></td>
-    </tr>
-    <tr>
-      <td>Lugar de Pago</td>
-      <td><?= htmlspecialchars($payLocation ?: $companyAddr) ?></td>
-    </tr>
-  </table>
+    <!-- III. CONDICIONES FINANCIERAS -->
+    <div class="clause-title">III. Condiciones Financieras</div>
+    <table class="datos">
+      <tr><td>Monto del Préstamo</td><td><?= $currency ?> <?= $amountFmt ?></td></tr>
+      <tr><td>Tasa de Interés</td><td><?= $intRate ?>% mensual</td></tr>
+      <tr><td>Tasa por Mora</td><td><?= $lateFeeRate ?>% mensual sobre saldo</td></tr>
+      <tr><td>Modalidad de Pago</td><td><?= e($loanTypeLabel) ?></td></tr>
+      <tr><td>Plazo</td><td><?= $term ?> cuota<?= $term > 1 ? 's' : '' ?> <?= $freq ?></td></tr>
+      <tr><td>Fecha de Desembolso</td><td><?= $disbDate ?></td></tr>
+      <tr><td>Primer Pago Vencimiento</td><td><?= $firstPay ?></td></tr>
+      <tr><td>Último Pago Vencimiento</td><td><?= $maturity ?></td></tr>
+      <tr><td>Días de Gracia</td><td><?= $graceDays ?> días</td></tr>
+      <tr style="background: #f9f9f9; font-weight: bold;"><td>MONTO TOTAL A PAGAR</td><td><?= $currency ?> <?= $totalPayFmt ?></td></tr>
+    </table>
 
-  <!-- IV. OBLIGACIONES -->
-  <div class="clause-title">IV. Obligaciones del Deudor</div>
-  <p>
-    EL DEUDOR se obliga a: (a) cancelar las cuotas en las fechas pactadas en el lugar o cuenta
-    indicada; (b) notificar cambios de domicilio o trabajo dentro de los 5 días hábiles siguientes;
-    (c) mantener vigente la garantía ofrecida durante toda la vigencia del préstamo;
-    (d) permitir al prestamista verificar el estado de los bienes dados en garantía;
-    (e) no contraer nuevas deudas que comprometan su capacidad de pago sin autorización escrita del
-    prestamista.
-  </p>
+    <!-- IV. OBLIGACIONES DEL DEUDOR -->
+    <div class="clause-title">IV. Obligaciones del Deudor</div>
+    <p>
+      EL DEUDOR se obliga a: (a) cancelar las cuotas en las fechas pactadas y según los métodos indicados;
+      (b) notificar cambios de domicilio o contacto dentro de 5 días hábiles;
+      (c) mantener vigente cualquier garantía ofrecida;
+      (d) permitir verificación del estado de bienes en garantía;
+      (e) no contraer deudas que comprometan su capacidad de pago sin autorización escrita.
+    </p>
 
-  <!-- V. MORA -->
-  <div class="clause-title">V. Mora e Intereses Moratorios</div>
-  <p>
-    El incumplimiento en el pago generará automáticamente un interés moratorio del
-    <strong><?= $lateFeeRate ?>%</strong> mensual sobre el saldo pendiente, sin necesidad
-    de requerimiento previo, aplicable desde el primer día de atraso hasta la cancelación total.
-    Los pagos realizados se aplicarán primero a gastos de cobranza, luego a intereses
-    (corrientes y moratorios) y finalmente a capital.
-  </p>
-  <?php if ($graceDays > 0): ?>
-    <p>Se establece un período de gracia de <strong><?= $graceDays ?> días</strong> a partir del
-      vencimiento antes de aplicar cargos por mora.</p>
-  <?php endif; ?>
+    <!-- V. MORA -->
+    <div class="clause-title">V. Mora e Intereses Moratorios</div>
+    <p>
+      El incumplimiento en el pago generará automáticamente un interés moratorio del
+      <strong><?= $lateFeeRate ?>%</strong> mensual sobre el saldo pendiente, sin requerimiento previo,
+      aplicable desde el primer día de atraso hasta la cancelación total.
+      <?php if ($graceDays > 0): ?>Se establece un período de gracia de <strong><?= $graceDays ?> días</strong>.<?php endif; ?>
+      Los pagos se aplicarán primero a gastos, luego a intereses (corrientes y moratorios), y finalmente a capital.
+    </p>
 
-  <!-- VI. VENCIMIENTO ANTICIPADO -->
-  <div class="clause-title">VI. Vencimiento Anticipado</div>
-  <p>
-    EL PRESTAMISTA podrá dar por vencido anticipadamente el préstamo en caso de: (a) mora
-    de dos o más cuotas consecutivas; (b) falsedad en los datos proporcionados;
-    (c) deterioro significativo de la garantía; (d) inicio de procesos concursales contra EL DEUDOR;
-    (e) incumplimiento de cualquier cláusula del presente contrato.
-  </p>
+    <!-- VI. MÉTODOS DE PAGO -->
+    <div class="clause-title">VI. Métodos de Pago Aceptados</div>
+    <div class="info-box avoid-break">
+      <p style="margin: 0 0 8px; font-weight: bold;">EL DEUDOR puede realizar pagos mediante:</p>
+      <ul>
+        <?php if ($payMethods['cash']): ?><li>✓ Efectivo</li><?php endif; ?>
+        <?php if ($payMethods['transfer']): ?><li>✓ Transferencia Bancaria</li><?php endif; ?>
+        <?php if ($payMethods['check']): ?><li>✓ Cheque a nombre de <?= e($companyName) ?></li><?php endif; ?>
+        <?php if ($payMethods['atm']): ?><li>✓ Depósito ATM</li><?php endif; ?>
+      </ul>
+    </div>
 
-  <!-- VII. MEDIDAS DE COBRANZA -->
-  <div class="clause-title">VII. Medidas de Cobranza y Ejecución</div>
-  <p>
-    En caso de incumplimiento, EL ACREEDOR queda facultado para: (a) gestionar el cobro
-    extrajudicialmente a través de las vías administrativas disponibles; (b) ceder el crédito a terceros
-    o empresas de cobranza; (c) ejecutar judicialmente el presente instrumento como título ejecutivo
-    ante los tribunales competentes, siendo todos los gastos judiciales y honorarios de abogado por
-    cuenta exclusiva de EL DEUDOR.
-  </p>
-
-  <?php if ($guarantee): ?>
-    <!-- VIII. GARANTÍA -->
-    <div class="clause-title">VIII. Garantía</div>
-    <div class="garantia-box">
-      <p><strong>Tipo de Garantía:</strong>
-        <?= ucfirst(htmlspecialchars($guarantee['guarantee_type'])) ?></p>
+    <!-- VII. GARANTÍA -->
+    <?php if ($guarantee): ?>
+    <div class="clause-title">VII. Garantía Prendaria</div>
+    <div class="info-box avoid-break">
+      <p><strong>Tipo:</strong> <?= ucfirst(e($guarantee['guarantee_type'])) ?></p>
       <?php if ($guarantee['guarantee_type'] === 'vehiculo'): ?>
-        <p>
-          <strong>Vehículo:</strong>
-          <?= htmlspecialchars($guarantee['brand'] ?? '') ?>
-          <?= htmlspecialchars($guarantee['model'] ?? '') ?>
-          (<?= htmlspecialchars($guarantee['year'] ?? '') ?>),
-          Placa: <strong><?= htmlspecialchars($guarantee['plate'] ?? '') ?></strong>,
-          Color: <?= htmlspecialchars($guarantee['color'] ?? '') ?>,
-          Serie: <?= htmlspecialchars($guarantee['serial'] ?? '') ?>.
-        </p>
+      <p style="margin: 6px 0;">
+        <strong>Vehículo:</strong> <?= e($guarantee['brand'] ?? '') ?> <?= e($guarantee['model'] ?? '') ?> (<?= e($guarantee['year'] ?? '') ?>),
+        Placa: <strong><?= e($guarantee['plate'] ?? '') ?></strong>,
+        Color: <?= e($guarantee['color'] ?? '') ?>,
+        Serie: <?= e($guarantee['serial'] ?? '') ?>.
+      </p>
       <?php else: ?>
-        <p><strong>Descripción:</strong> <?= htmlspecialchars($guarantee['description'] ?? '') ?></p>
+      <p style="margin: 6px 0;"><strong>Descripción:</strong> <?= e($guarantee['description'] ?? '') ?></p>
       <?php endif; ?>
       <?php if ($guarantee['estimated_value']): ?>
-        <p><strong>Valor Estimado:</strong> <?= $currency ?> <?= number_format((float)$guarantee['estimated_value'], 2) ?></p>
+      <p style="margin: 6px 0;"><strong>Valor Estimado:</strong> <?= $currency ?> <?= number_format((float)$guarantee['estimated_value'], 2) ?></p>
       <?php endif; ?>
-      <p style="font-size:10pt;margin-top:6px">
-        EL DEUDOR declara ser el legítimo propietario del bien dado en garantía, libre de gravámenes
-        y se compromete a no enajenar, gravar ni deteriorar el mismo sin autorización escrita del prestamista.
+      <p style="font-size:10pt;margin-top:6px;border-top:1px solid #999;padding-top:6px">
+        EL DEUDOR declara ser legítimo propietario del bien, libre de gravámenes, y no enajena,
+        gravará ni deteriorará el mismo sin autorización escrita del prestamista.
       </p>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <?php if ($aval): ?>
     <!-- AVAL -->
-    <?php $avalClause = $guarantee ? 'IX' : 'VIII'; ?>
-
-    <!-- Si querés forzar que la sección AVAL pase a nueva página: usa force-next-page -->
-    <div class="avoid-break">
-      <div class="clause-title"><?= $avalClause ?>. Aval y Fianza Solidaria</div>
-
-      <div class="aval-box avoid-break">
-        <p>
-          Comparece <strong><?= htmlspecialchars($aval['full_name']) ?></strong>,
-          mayor de edad, con Tarjeta de Identidad No.
-          <strong><?= htmlspecialchars($aval['identity_number'] ?? '___________________') ?></strong>,
-          con domicilio en <strong><?= htmlspecialchars($aval['address'] ?? '___________________') ?></strong>,
-          teléfono <strong><?= htmlspecialchars($aval['phone'] ?? '___________') ?></strong>,
-          quien se constituye como <strong>AVAL Y FIADOR SOLIDARIO</strong> de
-          <strong><?= htmlspecialchars($clientName) ?></strong> respecto del presente contrato.
-        </p>
-
-        <p style="margin-top:6px">
-          El AVAL se obliga de forma <strong>solidaria, ilimitada e incondicional</strong> al cumplimiento de todas las
-          obligaciones derivadas de este préstamo, incluyendo <strong>capital</strong> por
-          <strong><?= $currency ?> <?= $amountFmt ?></strong>,
-          <strong>intereses corrientes</strong>, <strong>intereses moratorios</strong>,
-          <strong>gastos de cobranza</strong>, <strong>honorarios profesionales</strong> y cualquier cargo permitido por este contrato,
-          hasta su cancelación total.
-        </p>
-
-        <p style="margin-top:6px">
-          El AVAL <strong>renuncia expresamente</strong> a los beneficios de orden, excusión y división,
-          aceptando que EL PRESTAMISTA pueda exigirle el pago <strong>directamente</strong>,
-          sin necesidad de requerimiento previo al DEUDOR. Asimismo, declara conocer las condiciones financieras,
-          lugar y forma de pago establecidas en la Sección III del presente contrato.
-        </p>
-      </div>
-    </div>
-  <?php endif; ?>
-
-  <!-- JURISDICCIÓN -->
-  <?php
-  $jClause = 'IX';
-  if ($guarantee && $aval) $jClause = 'X';
-  elseif ($guarantee || $aval) $jClause = 'IX';
-  ?>
-  <div class="clause-title"><?= $jClause ?>. Jurisdicción y Domicilio Especial</div>
-  <p>
-    Para todos los efectos legales del presente contrato, las partes señalan como domicilio especial
-    la ciudad de <strong><?= htmlspecialchars($signCity ?: '______________________') ?></strong>
-    y se someten expresamente a la jurisdicción del
-    <strong><?= htmlspecialchars($jurisdiction) ?></strong> correspondiente,
-    renunciando a su fuero domiciliar.
-  </p>
-
-  <!-- ACEPTACIÓN -->
-  <?php $xClause = (int)$jClause + 1; ?>
-  <div class="clause-title"><?= ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'][$xClause] ?>. Aceptación</div>
-  <p>
-    Las partes declaran haber leído y entendido el presente contrato en todas sus partes,
-    manifestando su conformidad al suscribirlo en la ciudad de
-    <strong><?= htmlspecialchars($signCity ?: '______________________') ?></strong>,
-    a los <strong><?= $today ?></strong> días del mes de <strong><?= $month ?></strong>
-    del año <strong><?= $year ?></strong>.
-  </p>
-
-  <!-- ── FIRMAS ─────────────────────────────────────────────── -->
-  <div class="firmas">
-    <div class="firmas-row">
-      <!-- Deudor -->
-      <div class="firma-box">
-        <div class="firma-line"></div>
-        <div class="firma-label"><strong>EL DEUDOR / CONTRATANTE</strong></div>
-        <div style="margin-top:6px;font-size:10pt">Nombre: <strong><?= htmlspecialchars($clientName) ?></strong></div>
-        <div style="font-size:10pt">No. Identidad: <strong><?= htmlspecialchars($client['identity_number'] ?? '') ?></strong></div>
-        <div style="margin-top:10px;font-size:10pt">HUELLA DIGITAL:</div>
-        <div class="huella-wrap">
-          <div class="huella-box"></div>
-          <div class="huella-label">Huella</div>
-        </div>
-      </div>
-      <!-- Prestamista / Apoderado -->
-      <div class="firma-box">
-        <div class="firma-line"></div>
-        <div class="firma-label"><strong>EL PRESTAMISTA / APODERADO LEGAL</strong></div>
-        <?php if ($repName): ?>
-          <div style="margin-top:6px;font-size:10pt">Nombre: <strong><?= htmlspecialchars($repName) ?></strong></div>
-          <div style="font-size:10pt">No. Identidad: <strong><?= htmlspecialchars($repIdentity) ?></strong></div>
-        <?php else: ?>
-          <div style="margin-top:6px;font-size:10pt"><strong><?= htmlspecialchars($companyName) ?></strong></div>
-          <?php if ($companyRTN): ?><div style="font-size:10pt">RTN: <?= htmlspecialchars($companyRTN) ?></div><?php endif; ?>
-        <?php endif; ?>
-      </div>
-    </div>
-
     <?php if ($aval): ?>
-      <!-- Firma del Aval -->
-      <div class="firmas-row" style="margin-top:50px">
+    <?php $avalClause = $guarantee ? 'VIII' : 'VII'; ?>
+    <div class="clause-title"><?= $avalClause ?>. Aval y Fianza Solidaria</div>
+    <div class="info-box avoid-break">
+      <p>
+        <strong><?= e($aval['full_name']) ?></strong>, mayor de edad, Tarjeta de Identidad:
+        <strong><?= e($aval['identity_number'] ?? '___________________') ?></strong>,
+        domicilio: <strong><?= e($aval['address'] ?? '___________________') ?></strong>,
+        teléfono: <strong><?= e($aval['phone'] ?? '___________') ?></strong>,
+        se constituye como <strong>AVAL Y FIADOR SOLIDARIO</strong> de <?= e($clientName) ?>.
+      </p>
+      <p style="margin-top:6px">
+        El AVAL se obliga de forma <strong>solidaria, ilimitada e incondicional</strong> al cumplimiento de todas las
+        obligaciones (capital, intereses corrientes, moratorios, gastos de cobranza y honorarios),
+        hasta su cancelación total. <strong>Renuncia a beneficios de orden, excusión y división</strong>,
+        aceptando que EL PRESTAMISTA exija el pago directamente, sin requerimiento previo al DEUDOR.
+      </p>
+    </div>
+    <?php endif; ?>
+
+    <!-- CLÁUSULA DE JURISDICCIÓN Y COMPETENCIA -->
+    <div class="clause-title">VIII<?= $aval ? 'I' : '' ?>. Jurisdicción y Competencia</div>
+    <p>
+      Ambas partes se someten voluntariamente a la jurisdicción competente del <?= e($jurisdiction) ?> 
+      correspondiente a la sede donde se ejecute este contrato. Se renuncia a cualquier otra jurisdicción 
+      que pudiera corresponder por domicilio u otra razón, debiendo dirigirse cualquier demanda ante los 
+      tribunales indicados. En caso de incumplimiento, este documento constituye título ejecutivo 
+      y puede ser presentado ante los tribunales para ejecución directa.
+    </p>
+
+    <!-- CLÁUSULA DE PROTECCIÓN DE FIRMA -->
+    <div class="clause-title">IX<?= $aval ? 'I' : '' ?>. Validez y Protección de Firmas</div>
+    <p>
+      Las firmas y huellas dactilares estampadas en este contrato son reconocidas como auténticas 
+      por ambas partes. Ambas declaran haber leído y comprendido íntegramente el contenido de este 
+      documento en sus términos, acepta sus obligaciones y derechos derivados. En caso de 
+      repudiación o controversia respecto a autenticidad de firmas, el deudor se somete a 
+      análisis grafológico a su costo. Cualquier enmienda o adición fuera del formato impreso 
+      es nula y no vinculante.
+    </p>
+
+  </div>
+
+  <!-- FIRMAS - PÁGINA SEPARADA PARA PROTEGER CORTES -->
+  <div class="page page-break-before">
+    <h1 style="font-size: 12pt; text-align: center; text-transform: uppercase; margin-bottom: 30px;">
+      Firmas y Reconocimiento de Obligaciones
+    </h1>
+
+    <p style="text-align: center; font-size: 10pt; color: #666; margin-bottom: 30px;">
+      Contrato No. <?= e($loan['loan_number']) ?>
+    </p>
+
+    <div class="firmas avoid-break">
+      <div class="firmas-row">
         <div class="firma-box">
           <div class="firma-line"></div>
-          <div class="firma-label"><strong>AVAL / FIADOR SOLIDARIO</strong></div>
-          <div style="margin-top:6px;font-size:10pt">Nombre: <strong><?= htmlspecialchars($aval['full_name']) ?></strong></div>
-          <div style="font-size:10pt">No. Identidad: <strong><?= htmlspecialchars($aval['identity_number'] ?? '') ?></strong></div>
-          <div style="margin-top:10px;font-size:10pt">HUELLA DIGITAL:</div>
+          <div class="firma-label">DEUDOR / CONTRATANTE</div>
+          <div class="firma-info">
+            <strong><?= e($clientName) ?></strong><br>
+            Identidad: <?= e($clientId) ?>
+          </div>
+          <div style="margin-top: 20px; font-size: 10pt;">HUELLA DIGITAL:</div>
           <div class="huella-wrap">
             <div class="huella-box"></div>
-            <div class="huella-label">Huella</div>
+            <div class="huella-label">Huella dedo índice derecho</div>
+          </div>
+        </div>
+        <div class="firma-box">
+          <div class="firma-line"></div>
+          <div class="firma-label">PRESTAMISTA / APODERADO</div>
+          <?php if ($repName): ?>
+          <div class="firma-info">
+            <strong><?= e($repName) ?></strong><br>
+            Identidad: <?= e($repIdentity) ?>
+          </div>
+          <?php else: ?>
+          <div class="firma-info">
+            <strong><?= e($companyName) ?></strong><br>
+            <?php if ($companyRTN): ?>RTN: <?= e($companyRTN) ?><?php endif; ?>
+          </div>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <?php if ($aval): ?>
+      <div class="firmas-row" style="margin-top: 80px;">
+        <div class="firma-box">
+          <div class="firma-line"></div>
+          <div class="firma-label">AVAL / FIADOR SOLIDARIO</div>
+          <div class="firma-info">
+            <strong><?= e($aval['full_name']) ?></strong><br>
+            Identidad: <?= e($aval['identity_number'] ?? '') ?>
+          </div>
+          <div style="margin-top: 20px; font-size: 10pt;">HUELLA DIGITAL:</div>
+          <div class="huella-wrap">
+            <div class="huella-box"></div>
+            <div class="huella-label">Huella dedo índice derecho</div>
           </div>
         </div>
         <div class="firma-box"></div>
       </div>
-    <?php endif; ?>
+      <?php endif; ?>
+    </div>
+
+    <p style="margin-top: 40px; font-size: 10pt; text-align: center; color: #666;">
+      Firmado en <?= e($companyCity ?: '______________________________') ?>, 
+      a los <?= $today ?> días del mes de <?= $month ?> del año <?= $year ?>.
+    </p>
   </div>
 
-  <!-- ── ANEXO: COPIA DE IDENTIDAD ─────────────────────────── -->
-  <!-- ── ANEXO: COPIA DE IDENTIDAD (DEUDOR + AVAL) ─────────── -->
-  <?php
-  $hasAvalImgs = ($aval && ($avalFront || $avalBack));
-  ?>
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- PÁGINA 3: ANEXO I - TABLA DE AMORTIZACIÓN -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
 
-  <?php if ($identityFront || $identityBack || $hasAvalImgs): ?>
-    <div class="identity-page avoid-break <?= $hasAvalImgs ? 'has-aval' : '' ?>">
+  <?php if (!empty($installments)): ?>
+  <div class="page page-break-before">
+    <h1 style="font-size: 12pt;">Anexo I – Tabla de Amortización Completa</h1>
+    <p style="text-align: center; font-size: 10pt; color: #666; margin-bottom: 16px;">
+      Contrato: <?= e($loan['loan_number']) ?> | Deudor: <?= e($clientName) ?>
+    </p>
 
-      <h1 style="font-size:12pt;margin-bottom:10px">Anexo: Copia de Documento de Identidad</h1>
+    <!-- Resumen Financiero -->
+    <table class="datos" style="margin-bottom: 16px;">
+      <tr>
+        <td>Capital Prestado</td>
+        <td><?= $currency ?> <?= number_format($totalPrincipal, 2) ?></td>
+      </tr>
+      <tr>
+        <td>Interés Total</td>
+        <td><?= $currency ?> <?= number_format($totalInterest, 2) ?></td>
+      </tr>
+      <tr style="font-weight: bold;">
+        <td>TOTAL A PAGAR</td>
+        <td><?= $currency ?> <?= number_format($totalPay, 2) ?></td>
+      </tr>
+    </table>
 
-      <!-- DEUDOR -->
-      <?php if ($identityFront || $identityBack): ?>
-        <p style="font-size:10pt;margin-bottom:6px">
-          <strong>DEUDOR:</strong> <strong><?= e($clientName) ?></strong> &nbsp;|&nbsp;
-          Identidad: <strong><?= e($client['identity_number'] ?? '') ?></strong>
-        </p>
+    <!-- Tabla de Amortización -->
+    <table class="amortizacion">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha Vence</th>
+          <th>Capital</th>
+          <th>Interés</th>
+          <th>Total Cuota</th>
+          <th>Saldo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php
+        $displayRows = count($installments) > 20 
+          ? array_merge(array_slice($installments, 0, 10), [null], array_slice($installments, -9))
+          : $installments;
 
-        <div class="identity-section" style="margin-bottom:12px">
-          <div class="identity-grid">
-            <?php if ($identityFront): ?>
-              <div class="identity-card">
-                <div class="identity-label">Frente:</div>
-                <img src="<?= e(url('/' . ltrim($identityFront, '/'))) ?>" class="identity-img" alt="Identidad Deudor Frente">
-              </div>
-            <?php endif; ?>
+        foreach ($displayRows as $inst):
+          if ($inst === null):
+        ?>
+        <tr>
+          <td colspan="6" style="text-align: center; font-size: 9pt; color: #999;">
+            ... (<?= count($installments) - 19 ?> cuotas intermedias) ...
+          </td>
+        </tr>
+        <?php
+            continue;
+          endif;
+        ?>
+        <tr>
+          <td><?= $inst['installment_number'] ?></td>
+          <td><?= date('d/m/Y', strtotime($inst['due_date'])) ?></td>
+          <td><?= $currency ?> <?= number_format($inst['principal_amount'], 2) ?></td>
+          <td><?= $currency ?> <?= number_format($inst['interest_amount'], 2) ?></td>
+          <td><?= $currency ?> <?= number_format($inst['total_amount'], 2) ?></td>
+          <td><?= $currency ?> <?= number_format($inst['balance_after'], 2) ?></td>
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
 
-            <?php if ($identityBack): ?>
-              <div class="identity-card">
-                <div class="identity-label">Reverso:</div>
-                <img src="<?= e(url('/' . ltrim($identityBack, '/'))) ?>" class="identity-img" alt="Identidad Deudor Reverso">
-              </div>
-            <?php endif; ?>
-          </div>
-        </div>
-      <?php endif; ?>
+    <p style="font-size: 9pt; color: #666; margin-top: 12px;">
+      <em>Nota: Tabla de amortización proyectada. Los montos pueden variar por pagos anticipados, parciales o por mora.</em>
+    </p>
+  </div>
+  <?php endif; ?>
 
-      <!-- AVAL -->
-      <?php if ($hasAvalImgs): ?>
-        <p style="font-size:10pt;margin:0 0 6px">
-          <strong>AVAL:</strong> <strong><?= e($aval['full_name'] ?? '') ?></strong> &nbsp;|&nbsp;
-          Identidad: <strong><?= e($aval['identity_number'] ?? '') ?></strong>
-        </p>
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- PÁGINA 4: ANEXO II - CUENTAS BANCARIAS PARA TRANSFERENCIAS -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
 
-        <div class="identity-section">
-          <div class="identity-grid">
-            <?php if ($avalFront): ?>
-              <div class="identity-card">
-                <div class="identity-label">Frente:</div>
-                <img src="<?= e(url('/' . ltrim($avalFront, '/'))) ?>" class="identity-img" alt="Identidad Aval Frente">
-              </div>
-            <?php endif; ?>
+  <?php if ($payMethods['transfer'] && !empty($bankAccounts)): ?>
+  <div class="page page-break-before avoid-break">
+    <h1 style="font-size: 12pt;">Anexo II – Cuentas Bancarias para Transferencias</h1>
+    <p style="text-align: center; font-size: 10pt; color: #666; margin-bottom: 20px;">
+      Contrato: <?= e($loan['loan_number']) ?> | Deudor: <?= e($clientName) ?>
+    </p>
 
-            <?php if ($avalBack): ?>
-              <div class="identity-card">
-                <div class="identity-label">Reverso:</div>
-                <img src="<?= e(url('/' . ltrim($avalBack, '/'))) ?>" class="identity-img" alt="Identidad Aval Reverso">
-              </div>
-            <?php endif; ?>
-          </div>
-        </div>
-      <?php endif; ?>
-
+    <?php foreach ($bankAccounts as $idx => $acc): ?>
+    <div class="info-box avoid-break">
+      <p style="margin: 0 0 8px; font-weight: bold;">Cuenta <?= $idx + 1 ?></p>
+      <div class="banco-item" style="border-bottom: 1px solid #999;">
+        <strong>Banco:</strong> <?= e($acc['bank']) ?>
+      </div>
+      <div class="banco-item">
+        <strong>Titular de la Cuenta:</strong> <?= e($acc['holder']) ?>
+      </div>
+      <div class="banco-item">
+        <strong>Número de Cuenta:</strong> <code style="font-family: monospace; background: #f9f9f9; padding: 2px 4px;"><?= e($acc['account']) ?></code>
+      </div>
+      <div class="banco-item">
+        <strong>Tipo de Cuenta:</strong> <?= $acc['type'] === 'checking' ? 'Corriente' : 'Ahorros' ?>
+      </div>
     </div>
+    <?php endforeach; ?>
+
+    <p style="font-size: 9.5pt; color: #666; margin-top: 16px; border-top: 1px solid #999; padding-top: 10px;">
+      <strong>Instrucciones de Pago:</strong> Al realizar una transferencia bancaria, favor indicar 
+      el número de contrato <strong><?= e($loan['loan_number']) ?></strong> en la referencia o concepto 
+      de la transferencia para una correcta identificación del pago.
+    </p>
+  </div>
+  <?php endif; ?>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- PÁGINA 5: ANEXO III - COPIAS DE IDENTIDAD -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <?php if ($identityFront || $identityBack || ($aval && ($avalFront || $avalBack))): ?>
+  <div class="page page-break-before avoid-break">
+    <h1 style="font-size: 12pt;">Anexo III – Copias de Documento de Identidad</h1>
+
+    <!-- DEUDOR -->
+    <?php if ($identityFront || $identityBack): ?>
+    <div style="margin-bottom: 24px; border-bottom: 1px solid #999; padding-bottom: 16px;">
+      <p style="font-size: 11pt; font-weight: bold; margin-bottom: 12px;">
+        DEUDOR: <?= e($clientName) ?> | Identidad: <?= e($clientId) ?>
+      </p>
+      <div class="identity-grid">
+        <?php if ($identityFront): ?>
+        <div class="identity-card">
+          <p style="font-size: 10pt; margin-bottom: 6px;"><strong>Frente:</strong></p>
+          <img src="<?= e(url('/' . ltrim($identityFront, '/'))) ?>" class="identity-img" alt="Identidad Deudor Frente">
+        </div>
+        <?php endif; ?>
+        <?php if ($identityBack): ?>
+        <div class="identity-card">
+          <p style="font-size: 10pt; margin-bottom: 6px;"><strong>Reverso:</strong></p>
+          <img src="<?= e(url('/' . ltrim($identityBack, '/'))) ?>" class="identity-img" alt="Identidad Deudor Reverso">
+        </div>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- AVAL -->
+    <?php if ($aval && ($avalFront || $avalBack)): ?>
+    <div>
+      <p style="font-size: 11pt; font-weight: bold; margin-bottom: 12px;">
+        AVAL: <?= e($aval['full_name'] ?? '') ?> | Identidad: <?= e($aval['identity_number'] ?? '') ?>
+      </p>
+      <div class="identity-grid">
+        <?php if ($avalFront): ?>
+        <div class="identity-card">
+          <p style="font-size: 10pt; margin-bottom: 6px;"><strong>Frente:</strong></p>
+          <img src="<?= e(url('/' . ltrim($avalFront, '/'))) ?>" class="identity-img" alt="Identidad Aval Frente">
+        </div>
+        <?php endif; ?>
+        <?php if ($avalBack): ?>
+        <div class="identity-card">
+          <p style="font-size: 10pt; margin-bottom: 6px;"><strong>Reverso:</strong></p>
+          <img src="<?= e(url('/' . ltrim($avalBack, '/'))) ?>" class="identity-img" alt="Identidad Aval Reverso">
+        </div>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php endif; ?>
+
+  </div>
   <?php endif; ?>
 
 </body>

@@ -1,6 +1,11 @@
 <?php
+/**
+ * VISTA: views/loans/create.php
+ * Formulario de Creación de Préstamo - COMPLETO CON MÉTODOS DE PAGO
+ */
+
 $currency = setting('app_currency', 'L');
-$avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
+$avalMin  = (float) setting('aval_required_amount', 0);
 ?>
 
 <div class="row justify-content-center">
@@ -168,6 +173,7 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
                 </div>
               </div>
             </div>
+
             <!-- AVAL (se muestra si monto >= aval_required_amount) -->
             <div class="row g-3 mt-1">
               <div class="col-12 d-none" id="aval_block">
@@ -200,6 +206,122 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
                 </div>
               </div>
             </div>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- SECCIÓN: MÉTODO DE PAGO Y CUENTAS BANCARIAS (NUEVA) -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+
+            <div class="row g-3 mt-3 mb-3">
+              <div class="col-12">
+                <div class="card border-info border-2">
+                  <div class="card-header bg-info bg-opacity-10 py-2">
+                    <i class="bi bi-credit-card me-2 text-info"></i>
+                    <strong>Métodos de Pago Aceptados</strong>
+                  </div>
+                  <div class="card-body">
+                    <p class="text-muted mb-3" style="font-size:.9rem">
+                      Selecciona los métodos de pago que el cliente puede usar para pagar las cuotas.
+                    </p>
+
+                    <!-- Métodos de Pago disponibles -->
+                    <div class="row g-3 mb-3">
+                      <!-- Efectivo -->
+                      <div class="col-md-6">
+                        <label class="d-flex align-items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            name="payment_method_cash" 
+                            id="payment_method_cash"
+                            class="form-check-input me-2" 
+                            value="1"
+                            checked>
+                          <span class="fw-semibold">
+                            <i class="bi bi-cash-coin text-success me-1"></i>Pago en Efectivo
+                          </span>
+                        </label>
+                        <small class="text-muted d-block ms-4">Entrega directa de dinero</small>
+                      </div>
+
+                      <!-- Transferencia Bancaria -->
+                      <div class="col-md-6">
+                        <label class="d-flex align-items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            name="payment_method_transfer" 
+                            id="payment_method_transfer"
+                            class="form-check-input me-2" 
+                            value="1">
+                          <span class="fw-semibold">
+                            <i class="bi bi-arrow-left-right text-primary me-1"></i>Transferencia Bancaria
+                          </span>
+                        </label>
+                        <small class="text-muted d-block ms-4">Selecciona la cuenta destino</small>
+                      </div>
+
+                      <!-- Cheque -->
+                      <div class="col-md-6">
+                        <label class="d-flex align-items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            name="payment_method_check" 
+                            id="payment_method_check"
+                            class="form-check-input me-2" 
+                            value="1">
+                          <span class="fw-semibold">
+                            <i class="bi bi-receipt text-warning me-1"></i>Cheque
+                          </span>
+                        </label>
+                        <small class="text-muted d-block ms-4">Cheque a nombre de la empresa</small>
+                      </div>
+
+                      <!-- Depósito ATM -->
+                      <div class="col-md-6">
+                        <label class="d-flex align-items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            name="payment_method_atm" 
+                            id="payment_method_atm"
+                            class="form-check-input me-2" 
+                            value="1">
+                          <span class="fw-semibold">
+                            <i class="bi bi-credit-card-2-front text-secondary me-1"></i>Depósito ATM
+                          </span>
+                        </label>
+                        <small class="text-muted d-block ms-4">Depósito a cuenta o ATM</small>
+                      </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <!-- Cuentas Bancarias Disponibles -->
+                    <div id="bankAccountsBlock" class="d-none">
+                      <h6 class="fw-semibold mb-2">Cuentas Bancarias Registradas</h6>
+                      <p class="text-muted mb-2" style="font-size:.9rem">
+                        Selecciona las cuentas donde los clientes pueden transferir pagos:
+                      </p>
+                      
+                      <div id="bankAccountsList" class="row g-2">
+                        <!-- Se llena dinámicamente con JS -->
+                      </div>
+
+                      <div id="noBankAccountsMsg" class="alert alert-warning py-2 mb-0" style="font-size:.85rem">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        No hay cuentas bancarias configuradas. Ve a <a href="<?= url('/settings') ?>" target="_blank">Configuración</a> 
+                        para agregar al menos una cuenta.
+                      </div>
+                    </div>
+
+                    <!-- Preview de Métodos Seleccionados -->
+                    <div class="mt-3 p-2 bg-light rounded" id="paymentMethodsPreview">
+                      <small class="text-muted">
+                        <strong>Métodos para este préstamo:</strong> <span id="methodsList">Efectivo</span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- ===== TABLA DE AMORTIZACIÓN EN VIVO ===== -->
             <div id="liveTableWrap" class="mt-4 d-none">
               <div class="d-flex align-items-center justify-content-between mb-2">
@@ -348,13 +470,12 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
   const CUR = '<?= $currency ?>';
   let allRows = [];
   let showFull = false;
-  let selectedType = 'A'; // ← tipo seleccionado actualmente
+  let selectedType = 'A';
   const PREVIEW_ROWS = 8;
   const AVAL_MIN = parseFloat('<?= (float)$avalMin ?>') || 0;
 
   // ─── NAVEGACIÓN DE PASOS ────────────────────────────────────
   function goStep(n) {
-    // Validate current step before advancing
     const current = parseInt(document.querySelector('[id^="step-"]:not(.d-none)')?.id.replace('step-', '') || '0');
     if (n > current) {
       if (current === 0) {
@@ -410,7 +531,6 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     const termInput = document.getElementById('term_months');
     const applyCol = document.getElementById('apply_col');
     const typeBInfo = document.getElementById('typeBPreview');
-    const liveWrap = document.getElementById('liveTableWrap');
 
     if (type === 'B') {
       termCol.classList.remove('d-none');
@@ -432,7 +552,7 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
   // ─── TIPO DE TARJETA ──────────────────────────────────────────
   document.querySelectorAll('.loan-type-radio').forEach(r => {
     r.addEventListener('change', () => {
-      selectedType = r.value; // ← actualizar variable global
+      selectedType = r.value;
       document.querySelectorAll('.type-card').forEach(c => {
         c.classList.remove('border-primary');
         c.classList.add('border-light');
@@ -489,7 +609,7 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
   }
 
   function addPeriods(baseDate, freq, periods) {
-    let d = new Date(baseDate + 'T12:00:00'); // noon avoids DST issues
+    let d = new Date(baseDate + 'T12:00:00');
     for (let p = 0; p < periods; p++) {
       switch (freq) {
         case 'weekly':
@@ -554,14 +674,7 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
         const total = round2(capital + interest);
         balance = round2(Math.max(0, balance - capital));
         const dueDate = addPeriods(baseDate, freq, i - 1);
-        rows.push({
-          i,
-          capital,
-          interest,
-          total,
-          balance,
-          dueDate
-        });
+        rows.push({i, capital, interest, total, balance, dueDate});
       }
     } else if (type === 'C') {
       let balance = P;
@@ -572,19 +685,9 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
         const total = round2(capital + interest);
         const newBal = isLast ? 0 : balance;
         const dueDate = addPeriods(baseDate, freq, i - 1);
-        rows.push({
-          i,
-          capital,
-          interest,
-          total,
-          balance: newBal,
-          dueDate,
-          isInterestOnly: !isLast
-        });
+        rows.push({i, capital, interest, total, balance: newBal, dueDate, isInterestOnly: !isLast});
       }
     } else if (type === 'B') {
-      // Tipo B: abono de capital FIJO por período (P/n), interés sobre saldo decreciente
-      // La cuota total VARÍA (baja cada período) porque el interés baja
       const capitalPerPeriod = round2(P / n);
       let balance = P;
       for (let i = 1; i <= n; i++) {
@@ -594,26 +697,18 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
         const total = round2(capital + interest);
         balance = round2(Math.max(0, balance - capital));
         const dueDate = addPeriods(baseDate, freq, i - 1);
-        rows.push({
-          i,
-          capital,
-          interest,
-          total,
-          balance,
-          dueDate,
-          isSimulation: true
-        });
+        rows.push({i, capital, interest, total, balance, dueDate, isSimulation: true});
       }
     }
     return rows;
   }
+
   async function loadAvalsForClient(clientId) {
     const sel = document.getElementById('aval_id');
     const quick = document.getElementById('aval_quick');
 
     if (!sel || !quick) return;
 
-    // reset UI
     sel.innerHTML = `<option value="">-- Seleccionar aval --</option>`;
     sel.classList.remove('is-invalid');
     quick.innerHTML = `<div class="text-muted">Seleccione un aval para ver detalle.</div>`;
@@ -625,9 +720,7 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
 
     try {
       const res = await fetch(`<?= url('/avales/by-client') ?>?client_id=${encodeURIComponent(clientId)}`, {
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers: {'Accept': 'application/json'}
       });
 
       if (!res.ok) {
@@ -639,7 +732,6 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
 
       if (!Array.isArray(data) || data.length === 0) {
         quick.innerHTML = `<div class="text-danger">Este cliente no tiene avales registrados.</div>`;
-        // si el monto ya exige aval, marcamos invalid
         const P = parseFloat(document.getElementById('principal')?.value || '0');
         if (AVAL_MIN > 0 && P >= AVAL_MIN) sel.classList.add('is-invalid');
         return;
@@ -680,7 +772,6 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
       return;
     }
 
-    // Si se requiere aval, aseguremos lista cargada
     const clientId = document.getElementById('client_id')?.value || '';
     if (sel.options.length <= 1) {
       loadAvalsForClient(clientId);
@@ -694,26 +785,17 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     const tbody = document.getElementById('liveTableBody');
     const tfoot = document.getElementById('liveTableFoot');
 
-    const displayRows = showFull ? rows : (rows.length > PREVIEW_ROWS + 4 ? [...rows.slice(0, PREVIEW_ROWS), null, ...rows.slice(-2)] :
-      rows);
+    const displayRows = showFull ? rows : (rows.length > PREVIEW_ROWS + 4 ? [...rows.slice(0, PREVIEW_ROWS), null, ...rows.slice(-2)] : rows);
 
     let html = '';
-    let totCap = 0,
-      totInt = 0,
-      totPay = 0;
 
     displayRows.forEach(r => {
       if (r === null) {
         html += `<tr class="table-light"><td colspan="6" class="text-center text-muted py-1" style="font-size:.72rem">· · · ${rows.length - PREVIEW_ROWS - 2} cuotas intermedias · · ·</td></tr>`;
         return;
       }
-      totCap += r.capital;
-      totInt += r.interest;
-      totPay += r.total;
       const isLast = r.i === rows.length;
-      const rowBadge = r.isSimulation && r.isInterestOnly ?
-        '<span class="badge bg-info text-dark ms-1" style="font-size:.6rem">sim.</span>' :
-        (r.isInterestOnly ? '<span class="badge bg-warning text-dark ms-1" style="font-size:.6rem">interés</span>' : '');
+      const rowBadge = r.isSimulation && r.isInterestOnly ? '<span class="badge bg-info text-dark ms-1" style="font-size:.6rem">sim.</span>' : (r.isInterestOnly ? '<span class="badge bg-warning text-dark ms-1" style="font-size:.6rem">interés</span>' : '');
       html += `<tr ${isLast?'class="table-success"':''}>
       <td class="text-center fw-semibold">${r.i}</td>
       <td>${fmtDate(r.dueDate)}</td>
@@ -725,7 +807,6 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     });
     tbody.innerHTML = html;
 
-    // Use full totals for footer
     const fRows = allRows;
     const fCap = fRows.reduce((a, r) => a + r.capital, 0);
     const fInt = fRows.reduce((a, r) => a + r.interest, 0);
@@ -743,10 +824,7 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
 
   function refreshTable() {
     const type = selectedType;
-
-    // Tipo B: actualizar info de interés diario (siempre, aunque no haya tabla aún)
     if (type === 'B') updateTypeBPreview();
-
     allRows = buildRows();
 
     if (!allRows.length) {
@@ -757,19 +835,9 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     document.getElementById('liveTableWrap').classList.remove('d-none');
 
     const freq = document.getElementById('payment_frequency').value;
-    const fLabel = {
-      weekly: 'Semanal',
-      biweekly: 'Quincenal',
-      monthly: 'Mensual',
-      bimonthly: 'Bimensual',
-      quarterly: 'Trimestral',
-      semiannual: 'Semestral',
-      annual: 'Anual'
-    } [freq];
+    const fLabel = {weekly: 'Semanal', biweekly: 'Quincenal', monthly: 'Mensual', bimonthly: 'Bimensual', quarterly: 'Trimestral', semiannual: 'Semestral', annual: 'Anual'}[freq];
 
-    document.getElementById('liveTableBadge').textContent = type === 'B' ?
-      `Tipo B · Simulación · ${fLabel}` :
-      `Tipo ${type} · ${fLabel}`;
+    document.getElementById('liveTableBadge').textContent = type === 'B' ? `Tipo B · Simulación · ${fLabel}` : `Tipo ${type} · ${fLabel}`;
 
     const totalInt = allRows.reduce((a, r) => a + r.interest, 0);
     const totalPay = allRows.reduce((a, r) => a + r.total, 0);
@@ -803,7 +871,6 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     document.getElementById('typeb_daily').textContent = fmt(daily) + '/día';
   }
 
-  // ─── MORA EJEMPLO EN VIVO ────────────────────────────────────
   function updateMoraExample() {
     const P = parseFloat(document.getElementById('principal').value) || 10000;
     const latePct = parseFloat(document.getElementById('late_fee_rate_input').value) || 5;
@@ -818,7 +885,6 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
       `Cargo por mora = ${fmt(P)} × (${latePct}% ÷ 30) × ${efDays} = <strong>${fmt(mora)}</strong>`;
   }
 
-  // ─── RESUMEN FINAL ───────────────────────────────────────────
   function updateSummary() {
     const type = selectedType;
     const P = parseFloat(document.getElementById('principal').value) || 0;
@@ -826,20 +892,8 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     const rtype = document.getElementById('rate_type').value;
     const n = parseInt(document.getElementById('term_months').value) || 0;
     const freq = document.getElementById('payment_frequency').value;
-    const fLabel = {
-      weekly: 'Semanal',
-      biweekly: 'Quincenal',
-      monthly: 'Mensual',
-      bimonthly: 'Bimensual',
-      quarterly: 'Trimestral',
-      semiannual: 'Semestral',
-      annual: 'Anual'
-    } [freq];
-    const tLabel = {
-      A: 'Cuota Nivelada',
-      B: 'Variable por Días',
-      C: 'Interés Simple'
-    } [type];
+    const fLabel = {weekly: 'Semanal', biweekly: 'Quincenal', monthly: 'Mensual', bimonthly: 'Bimensual', quarterly: 'Trimestral', semiannual: 'Semestral', annual: 'Anual'}[freq];
+    const tLabel = {A: 'Cuota Nivelada', B: 'Variable por Días', C: 'Interés Simple'}[type];
     const client = document.getElementById('client_id').options[document.getElementById('client_id').selectedIndex]?.text || 'Sin seleccionar';
 
     const rows = type !== 'B' ? (allRows.length ? allRows : buildRows()) : [];
@@ -858,6 +912,77 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     document.getElementById('finalSummary').innerHTML = '<i class="bi bi-check-circle me-2"></i>' + html;
     updateMoraExample();
   }
+
+  // ─── MÉTODOS DE PAGO (NUEVO) ─────────────────────────────────
+  const bankAccountsData = <?= json_encode(['accounts' => array_filter([
+    setting('bank_name_1') ? ['id' => 1, 'bank' => setting('bank_name_1'), 'account' => setting('bank_account_1'), 'holder' => setting('bank_account_holder_1'), 'type' => setting('bank_account_type_1'), 'iban' => setting('bank_account_iban_1')] : null,
+    setting('bank_name_2') ? ['id' => 2, 'bank' => setting('bank_name_2'), 'account' => setting('bank_account_2'), 'holder' => setting('bank_account_holder_2'), 'type' => setting('bank_account_type_2'), 'iban' => setting('bank_account_iban_2')] : null,
+    setting('bank_name_3') ? ['id' => 3, 'bank' => setting('bank_name_3'), 'account' => setting('bank_account_3'), 'holder' => setting('bank_account_holder_3'), 'type' => setting('bank_account_type_3'), 'iban' => setting('bank_account_iban_3')] : null,
+  ])]) ?>;
+
+  function updatePaymentMethodsUI() {
+    const transfer = document.getElementById('payment_method_transfer')?.checked || false;
+    const blockEl  = document.getElementById('bankAccountsBlock');
+    const listEl   = document.getElementById('bankAccountsList');
+    const noAccMsg = document.getElementById('noBankAccountsMsg');
+    
+    if (!blockEl || !listEl) return;
+
+    blockEl.classList.toggle('d-none', !transfer);
+
+    if (!transfer) {
+      updateMethodsPreview();
+      return;
+    }
+
+    listEl.innerHTML = '';
+    const accounts = bankAccountsData.accounts || [];
+
+    if (accounts.length === 0) {
+      noAccMsg.classList.remove('d-none');
+      return;
+    }
+
+    noAccMsg.classList.add('d-none');
+
+    accounts.forEach(acc => {
+      const id = 'bank_account_select_' + acc.id;
+      const typeLabel = acc.type === 'checking' ? 'Corriente' : 'Ahorros';
+      const html = `
+        <div class="col-md-6">
+          <label class="d-flex align-items-center cursor-pointer">
+            <input type="checkbox" name="payment_bank_account_${acc.id}" id="${id}" class="form-check-input me-2" value="1">
+            <div class="flex-grow-1">
+              <strong style="font-size:.9rem">${acc.bank}</strong>
+              <div style="font-size:.75rem;color:#666">${acc.holder} • ${typeLabel}</div>
+              <code style="font-size:.72rem">${acc.account}</code>
+              ${acc.iban ? `<div style="font-size:.72rem;color:#999">IBAN: ${acc.iban}</div>` : ''}
+            </div>
+          </label>
+        </div>
+      `;
+      listEl.innerHTML += html;
+    });
+
+    updateMethodsPreview();
+  }
+
+  function updateMethodsPreview() {
+    const methods = [];
+    if (document.getElementById('payment_method_cash')?.checked) methods.push('Efectivo');
+    if (document.getElementById('payment_method_transfer')?.checked) methods.push('Transferencia');
+    if (document.getElementById('payment_method_check')?.checked) methods.push('Cheque');
+    if (document.getElementById('payment_method_atm')?.checked) methods.push('ATM');
+
+    const preview = document.getElementById('methodsList');
+    if (preview) {
+      preview.textContent = methods.length > 0 ? methods.join(', ') : 'Ninguno seleccionado';
+    }
+  }
+
+  ['payment_method_cash', 'payment_method_transfer', 'payment_method_check', 'payment_method_atm'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', updatePaymentMethodsUI);
+  });
 
   // ─── LISTENERS ───────────────────────────────────────────────
 
@@ -883,25 +1008,16 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     const term = document.getElementById('term_months');
     let valid = true;
 
-    if (!clientId.value) {
-      valid = false;
-    }
-    if (!principal.value || parseFloat(principal.value) <= 0) {
-      valid = false;
-    }
-    if (!rate.value || parseFloat(rate.value) <= 0) {
-      valid = false;
-    }
-    if (selectedType !== 'B' && (!term.value || parseInt(term.value) <= 0)) {
-      valid = false;
-    }
-    // Validar aval si es requerido
+    if (!clientId.value) valid = false;
+    if (!principal.value || parseFloat(principal.value) <= 0) valid = false;
+    if (!rate.value || parseFloat(rate.value) <= 0) valid = false;
+    if (selectedType !== 'B' && (!term.value || parseInt(term.value) <= 0)) valid = false;
+
     const avalSel = document.getElementById('aval_id');
     if (AVAL_MIN > 0 && parseFloat(principal.value || '0') >= AVAL_MIN) {
       if (!avalSel || !avalSel.value) {
         valid = false;
         avalSel?.classList.add('is-invalid');
-        // por si el usuario está en step 2, mostramos el bloque
         document.getElementById('aval_block')?.classList.remove('d-none');
       } else {
         avalSel.classList.remove('is-invalid');
@@ -910,7 +1026,6 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     if (!valid) {
       e.preventDefault();
       alert('Por favor complete todos los campos obligatorios (Cliente, Monto, Tasa' + (selectedType !== 'B' ? ', Número de cuotas' : '') + ')');
-      // Si aval es requerido, ir al Step 1 (donde está el aval)
       if (AVAL_MIN > 0 && parseFloat(principal.value || '0') >= AVAL_MIN) {
         goStep(1);
       } else {
@@ -924,12 +1039,11 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creando préstamo...';
   });
 
-  // Tipo cards hover
   document.querySelectorAll('.type-card').forEach(c => {
     c.addEventListener('mouseenter', () => c.style.transform = 'translateY(-2px)');
     c.addEventListener('mouseleave', () => c.style.transform = '');
   });
-  // ─── AVAL: listeners ─────────────────────────────────────────
+
   document.getElementById('client_id')?.addEventListener('change', () => {
     loadAvalsForClient(document.getElementById('client_id').value);
     updateAvalBlock();
@@ -954,15 +1068,13 @@ $avalMin  = (float) setting('aval_required_amount', 0); // ej 10000
     const phone = opt.dataset.phone || '—';
     const rel = opt.dataset.rel || '—';
 
-    quick.innerHTML = `
-    <div><strong>Tel:</strong> ${phone}</div>
-    <div><strong>Relación:</strong> ${rel}</div>
-  `;
+    quick.innerHTML = `<div><strong>Tel:</strong> ${phone}</div><div><strong>Relación:</strong> ${rel}</div>`;
   });
-  // Init AVAL
+
+  // Init
   loadAvalsForClient(document.getElementById('client_id')?.value || '');
   updateAvalBlock();
-  // Init
   updateTypeUI(selectedType);
   updateMoraExample();
+  updatePaymentMethodsUI();
 </script>
