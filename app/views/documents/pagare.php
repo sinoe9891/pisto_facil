@@ -11,13 +11,13 @@
 ?>
 <!DOCTYPE html>
 <html lang="es">
-<div style="font-family: monospace; font-size: 11px; background:#fff3cd; padding:8px; margin-bottom:10px;">
+<!-- <div style="font-family: monospace; font-size: 11px; background:#fff3cd; padding:8px; margin-bottom:10px;">
   DEBUG: installments_type=<?= gettype($installments ?? null) ?> |
   installments_count=<?= is_countable($installments ?? null) ? count($installments) : -1 ?> |
   loan_interest_rate=<?= (float)($loan['interest_rate'] ?? 0) ?> |
   loan_term=<?= (int)($loan['term_months'] ?? 0) ?> |
   loan_principal=<?= (float)($loan['principal'] ?? 0) ?>
-</div>
+</div> -->
 <head>
   <meta charset="UTF-8">
   <title>Pagaré – <?= htmlspecialchars($loan['loan_number'] ?? '') ?></title>
