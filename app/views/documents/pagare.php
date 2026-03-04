@@ -2,16 +2,22 @@
 
 /**
  * VISTA: views/documents/pagare.php
- * Pagaré - VERSIÓN PROFESIONAL FINAL
- * - Monto total a pagar (Capital + Interés)
- * - Diseño profesional sin colores
- * - Cuentas bancarias en Anexo II separado
- * - Tabla de amortización como anexo
+ * Pagaré - VERSIÓN AUTO-DETECCIÓN
+ * - ✅ Detecta automáticamente las claves del array
+ * - ✅ Calcula correctamente sin importar estructura
+ * - ✅ Muestra tabla de amortización
+ * - ✅ Firmas en PRIMERA PÁGINA
  */
 ?>
 <!DOCTYPE html>
 <html lang="es">
-
+<div style="font-family: monospace; font-size: 11px; background:#fff3cd; padding:8px; margin-bottom:10px;">
+  DEBUG: installments_type=<?= gettype($installments ?? null) ?> |
+  installments_count=<?= is_countable($installments ?? null) ? count($installments) : -1 ?> |
+  loan_interest_rate=<?= (float)($loan['interest_rate'] ?? 0) ?> |
+  loan_term=<?= (int)($loan['term_months'] ?? 0) ?> |
+  loan_principal=<?= (float)($loan['principal'] ?? 0) ?>
+</div>
 <head>
   <meta charset="UTF-8">
   <title>Pagaré – <?= htmlspecialchars($loan['loan_number'] ?? '') ?></title>
@@ -49,96 +55,91 @@
 
     .header-info {
       font-size: 9.2pt;
-      margin-bottom: 14px;
-      padding-bottom: 7px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
     }
 
     .monto-header {
       font-size: 14.72pt;
-      padding: 11px 18px;
-      margin: 0 auto 18px;
+      padding: 10px 16px;
+      margin: 0 auto 12px;
     }
 
     .monto-wrap {
-      margin-bottom: 18px;
+      margin-bottom: 12px;
     }
 
     p {
-      margin-bottom: 9px;
+      margin-bottom: 8px;
+      font-size: 10.8pt;
     }
 
     .info-box {
-      padding: 11px;
-      margin: 11px 0;
+      padding: 10px;
+      margin: 10px 0;
     }
 
     .info-box h4 {
-      margin: 0 0 7px;
-      font-size: 10.12pt;
-    }
-
-    .info-box .item {
-      margin: 5px 0;
-      font-size: 10.12pt;
-    }
-
-    .banco-item {
-      margin: 7px 0;
-      padding: 7px 0;
-      font-size: 9.66pt;
+      margin: 0 0 6px;
+      font-size: 9.8pt;
     }
 
     .clausulas {
-      margin: 14px 0;
+      margin: 12px 0;
     }
 
     .clausulas li {
-      margin: 7px 0;
-      font-size: 10.12pt;
+      margin: 5px 0;
+      font-size: 9.8pt;
+      line-height: 1.4;
     }
 
     .firmas {
-      margin-top: 55px;
+      margin-top: 20px;
+      page-break-inside: avoid;
     }
 
     .firma-line {
-      margin-top: 50px;
-      margin-bottom: 5px;
+      margin-top: 35px;
+      margin-bottom: 4px;
     }
 
     .firma-label {
-      font-size: 9.2pt;
+      font-size: 8.5pt;
+      margin-bottom: 2px;
     }
 
     .huella-box {
-      width: 70px;
-      height: 70px;
+      width: 55px;
+      height: 55px;
     }
 
     .huella-label {
-      font-size: 7.36pt;
+      font-size: 6.5pt;
     }
 
     .firma-info {
-      font-size: 9.2pt;
-      margin-top: 5px;
+      font-size: 8.5pt;
+      margin-top: 2px;
+      line-height: 1.2;
     }
 
     .firma-info div {
-      margin: 2px 0;
+      margin: 1px 0;
+      font-size: 8pt;
     }
 
     table.amortizacion {
-      font-size: 8.74pt;
-      margin: 11px 0;
+      font-size: 8.2pt;
+      margin: 10px 0;
     }
 
     table.amortizacion th {
-      padding: 5px 3px;
+      padding: 4px 2px;
     }
 
     table.amortizacion td {
-      padding: 3px 4px;
+      padding: 2px 3px;
     }
 
     <?php elseif ($pageSize === 'legal'): ?>
@@ -157,96 +158,83 @@
 
     .header-info {
       font-size: 9.5pt;
-      margin-bottom: 15.2px;
-      padding-bottom: 7.6px;
+      margin-bottom: 13px;
+      padding-bottom: 7px;
     }
 
     .monto-header {
       font-size: 15.2pt;
-      padding: 11.4px 19px;
-      margin: 0 auto 19px;
+      padding: 11px 18px;
+      margin: 0 auto 15px;
     }
 
     .monto-wrap {
-      margin-bottom: 19px;
+      margin-bottom: 15px;
     }
 
     p {
-      margin-bottom: 9.5px;
+      margin-bottom: 9px;
     }
 
     .info-box {
-      padding: 11.4px;
-      margin: 11.4px 0;
-    }
-
-    .info-box h4 {
-      margin: 0 0 7.6px;
-      font-size: 10.45pt;
-    }
-
-    .info-box .item {
-      margin: 5.7px 0;
-      font-size: 10.45pt;
-    }
-
-    .banco-item {
-      margin: 7.6px 0;
-      padding: 7.6px 0;
-      font-size: 9.975pt;
+      padding: 11px;
+      margin: 11px 0;
     }
 
     .clausulas {
-      margin: 15.2px 0;
+      margin: 14px 0;
     }
 
     .clausulas li {
-      margin: 7.6px 0;
+      margin: 6px 0;
       font-size: 10.45pt;
+      line-height: 1.5;
     }
 
     .firmas {
-      margin-top: 57px;
+      margin-top: 25px;
     }
 
     .firma-line {
-      margin-top: 57px;
-      margin-bottom: 5.7px;
+      margin-top: 40px;
+      margin-bottom: 5px;
     }
 
     .firma-label {
-      font-size: 9.5pt;
+      font-size: 9.2pt;
     }
 
     .huella-box {
-      width: 76px;
-      height: 76px;
+      width: 62px;
+      height: 62px;
     }
 
     .huella-label {
-      font-size: 7.6pt;
+      font-size: 7.2pt;
     }
 
     .firma-info {
-      font-size: 9.5pt;
-      margin-top: 5.7px;
+      font-size: 9.2pt;
+      margin-top: 3px;
+      line-height: 1.3;
     }
 
     .firma-info div {
-      margin: 1.9px 0;
+      margin: 1.5px 0;
+      font-size: 8.5pt;
     }
 
     table.amortizacion {
-      font-size: 9.025pt;
-      margin: 11.4px 0;
+      font-size: 9pt;
+      margin: 11px 0;
     }
 
     table.amortizacion th {
-      padding: 5.7px 3.8px;
+      padding: 5px 3px;
     }
 
     table.amortizacion td {
-      padding: 3.8px 5.7px;
+      padding: 3px 4px;
     }
 
     <?php endif; ?>@media screen {
@@ -319,7 +307,10 @@
     }
 
     .banco-item {
+      margin: 8px 0;
+      padding: 8px 0;
       border-bottom: 1px solid #ddd;
+      font-size: 10.5pt;
     }
 
     .banco-item:last-child {
@@ -346,7 +337,7 @@
     .firmas-row {
       display: flex;
       justify-content: space-between;
-      gap: 40px;
+      gap: 30px;
     }
 
     .firma-box {
@@ -366,7 +357,7 @@
     .huella-wrap {
       display: inline-block;
       text-align: center;
-      margin-top: 10px;
+      margin-top: 6px;
     }
 
     .huella-box {
@@ -376,7 +367,7 @@
 
     .huella-label {
       color: #555;
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
     .firma-info {
@@ -385,6 +376,13 @@
 
     .firma-info div {
       margin: 2px 0;
+    }
+
+    .firmas-fecha {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 10pt;
+      color: #666;
     }
 
     table.amortizacion {
@@ -511,11 +509,45 @@
   $dueDateParts  = $dueDate ? explode('-', $dueDate) : ['____', '__', '__'];
   $lateFeeRate   = number_format((float)($loan['late_fee_rate'] ?? 0) * 100, 2);
 
-  // Obtener tabla de amortización para calcular TOTAL A PAGAR
-  $installments = isset($installments) ? $installments : [];
-  $totalPrincipal = (float)array_sum(array_column($installments, 'principal_amount'));
-  $totalInterest = (float)array_sum(array_column($installments, 'interest_amount'));
+$installments = isset($installments) ? (array)$installments : [];
+
+$sumField = function(array $rows, array $keys): float {
+  $sum = 0.0;
+  foreach ($rows as $r) {
+    if (!is_array($r)) continue;
+    $val = null;
+    foreach ($keys as $k) {
+      if (isset($r[$k]) && $r[$k] !== '') { $val = $r[$k]; break; }
+    }
+    $sum += (float)($val ?? 0);
+  }
+  return $sum;
+};
+
+// Totales (soporta cualquier estructura)
+$totalPrincipal = $sumField($installments, ['principal_amount','principal','capital']);
+$totalInterest  = $sumField($installments, ['interest_amount','interest','interes']);
+$totalToPay     = $sumField($installments, ['total_amount','total','cuota_total']);
+
+// echo "<!-- Debug Totales: principal=$totalPrincipal, interest=$totalInterest, total=$totalToPay -->";
+
+// Si no viene total por cuota, lo armamos
+if ($totalToPay <= 0 && ($totalPrincipal > 0 || $totalInterest > 0)) {
   $totalToPay = $totalPrincipal + $totalInterest;
+}
+
+// Fallback SOLO si NO hay cuotas reales
+if ($totalToPay <= 0 || empty($installments)) {
+  $totalPrincipal = (float)$amount;
+  $interestRate   = (float)($loan['interest_rate'] ?? 0);
+  $termMonths     = (int)($loan['term_months'] ?? 1);
+
+  // Si tu interest_rate viniera como 15 en vez de 0.15, descomenta esto:
+  // if ($interestRate > 1) $interestRate = $interestRate / 100;
+
+  $totalInterest  = $totalPrincipal * $interestRate * $termMonths;
+  $totalToPay     = $totalPrincipal + $totalInterest;
+}
 
   // Meses en español
   $spanishMonths = [
@@ -571,28 +603,7 @@
   function numToWords(int $n): string
   {
     if ($n === 0) return 'CERO';
-    $ones = [
-      '',
-      'UNO',
-      'DOS',
-      'TRES',
-      'CUATRO',
-      'CINCO',
-      'SEIS',
-      'SIETE',
-      'OCHO',
-      'NUEVE',
-      'DIEZ',
-      'ONCE',
-      'DOCE',
-      'TRECE',
-      'CATORCE',
-      'QUINCE',
-      'DIECISÉIS',
-      'DIECISIETE',
-      'DIECIOCHO',
-      'DIECINUEVE'
-    ];
+    $ones = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE', 'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
     $tens = ['', '', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
     $hundreds = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
     if ($n < 20) return $ones[$n];
@@ -609,7 +620,7 @@
   <button class="print-btn no-print" onclick="window.print()">🖨 Imprimir Pagaré</button>
 
   <!-- ═══════════════════════════════════════════════════════════════ -->
-  <!-- PÁGINA 1: PAGARÉ PRINCIPAL -->
+  <!-- PÁGINA 1: PAGARÉ PRINCIPAL CON FIRMAS -->
   <!-- ═══════════════════════════════════════════════════════════════ -->
 
   <div class="page">
@@ -640,7 +651,7 @@
     </p>
 
     <!-- CUERPO DEL PAGARÉ -->
-    <p style="margin-top: 16px;">
+    <p style="margin-top: 12px;">
       Por el presente <strong>PAGARÉ</strong>, <strong>HAGO CONSTAR</strong> que <strong>DEBO Y CANCELARÉ</strong>
       sin ningún requerimiento legal a:
       <strong><?= e($companyName ?: '_______________________________________________') ?></strong>
@@ -663,35 +674,27 @@
     <div class="clausulas avoid-break">
       <strong>Cláusulas y Condiciones:</strong>
       <ol>
-        <li><strong>Interés Moratorio:</strong> <?= $lateFeeRate ?>% mensual sobre saldo pendiente, aplicable desde el primer día de atraso.</li>
-        <li><strong>Gastos de Cobro:</strong> El deudor asume todos los gastos de cobranza, honorarios de abogado y costas judicales en caso de ejecución.</li>
-        <li><strong>Aplicación de Pagos:</strong> Se aplicarán primero a gastos de cobranza, luego a intereses (corrientes y moratorios), y finalmente a capital.</li>
-        <li><strong>Notificaciones:</strong> Vía mensaje de texto, llamadas telefónicas a <?= e($clientCelular) ?>, dirección <?= e(trim($clientAddr . ' ' . $clientCity)) ?> y correo <?= e($clientEmail) ?>.</li>
+        <li><strong>Interés Moratorio:</strong> <?= $lateFeeRate ?>% mensual sobre saldo pendiente.</li>
+        <li><strong>Gastos de Cobro:</strong> El deudor asume todos los gastos, honorarios y costas judicales.</li>
+        <li><strong>Aplicación de Pagos:</strong> Primero gastos, luego intereses, finalmente capital.</li>
+        <li><strong>Notificaciones:</strong> Vía teléfono, SMS, domicilio y correo del deudor.</li>
       </ol>
     </div>
 
-    <!-- FECHA Y FIRMA -->
-    <p style="margin-top: 20px;">
-      Para constancia, firmo y estampo mi huella en
-      <strong><?= e($signCity ?: '______________________________') ?></strong>,
-      a los <strong><?= $today ?></strong> días del mes de <strong><?= $month ?></strong>
-      del año <strong><?= $year ?></strong>.
-    </p>
-
-    <!-- FIRMAS -->
+    <!-- ✅ FIRMAS EN PRIMERA PÁGINA -->
     <div class="firmas avoid-break">
       <div class="firmas-row">
         <div class="firma-box">
           <div class="firma-line"></div>
           <div class="firma-label">DEUDOR (Firma)</div>
           <div class="firma-info">
-            <div>Nombre: <strong><?= e($clientName) ?></strong></div>
-            <div>Identidad: <strong><?= e($clientId) ?></strong></div>
+            <div><?= e($clientName) ?></div>
+            <div>Identidad: <?= e($clientId) ?></div>
           </div>
-          <div style="margin-top: 10px; font-size: 10pt;">HUELLA DIGITAL:</div>
+          <div style="margin-top: 4px; font-size: 9pt;">HUELLA:</div>
           <div class="huella-wrap">
             <div class="huella-box"></div>
-            <div class="huella-label">Huella</div>
+            <div class="huella-label">Índice derecho</div>
           </div>
         </div>
 
@@ -700,14 +703,19 @@
           <div class="firma-label">ACREEDOR (Firma)</div>
           <div class="firma-info">
             <?php if ($repName): ?>
-              <div>Nombre: <strong><?= e($repName) ?></strong></div>
-              <div>Identidad: <strong><?= e($repIdentity) ?></strong></div>
+              <div><?= e($repName) ?></div>
+              <div>Identidad: <?= e($repIdentity) ?></div>
             <?php else: ?>
-              <div><strong><?= e($companyName) ?></strong></div>
+              <div><?= e($companyName) ?></div>
               <?php if ($companyRTN): ?><div>RTN: <?= e($companyRTN) ?></div><?php endif; ?>
             <?php endif; ?>
           </div>
         </div>
+      </div>
+
+      <div class="firmas-fecha">
+        Firmado en <?= e($signCity ?: '______________________________') ?>,
+        a los <?= $today ?> de <?= $month ?> de <?= $year ?>
       </div>
     </div>
   </div>
@@ -732,30 +740,27 @@
 
       <p style="margin-top: 12px;">
         <strong>En consecuencia, me obligo solidariamente</strong> a pagar la totalidad de la deuda incluyendo:
-        capital por <?= $currency ?> <?= number_format($totalToPay, 2) ?>, intereses corrientes, intereses moratorios al
-        <?= $lateFeeRate ?>% mensual, gastos de cobranza y honorarios profesionales.
+        capital, intereses corrientes, intereses moratorios al <?= $lateFeeRate ?>% mensual, gastos y honorarios.
       </p>
 
       <p style="margin-top: 12px;">
         <strong>Renuncio expresamente</strong> a los beneficios de orden, excusión y división,
-        aceptando que el acreedor pueda exigirme el pago directamente sin necesidad de requerimiento previo
-        al deudor principal. Declaro conocer las condiciones del préstamo.
+        aceptando que el acreedor pueda exigirme el pago directamente sin requerimiento al deudor principal.
       </p>
 
-      <!-- FIRMA DEL AVAL -->
-      <div class="firmas avoid-break" style="margin-top: 50px;">
+      <div class="firmas avoid-break" style="margin-top: 40px;">
         <div class="firmas-row">
           <div class="firma-box">
             <div class="firma-line"></div>
             <div class="firma-label">AVAL / FIADOR SOLIDARIO (Firma)</div>
             <div class="firma-info">
-              <div>Nombre: <strong><?= e($aval['full_name']) ?></strong></div>
-              <div>Identidad: <strong><?= e($aval['identity_number'] ?? '') ?></strong></div>
+              <div><?= e($aval['full_name']) ?></div>
+              <div>Identidad: <?= e($aval['identity_number'] ?? '') ?></div>
             </div>
-            <div style="margin-top: 10px; font-size: 10pt;">HUELLA DIGITAL:</div>
+            <div style="margin-top: 4px; font-size: 9pt;">HUELLA:</div>
             <div class="huella-wrap">
               <div class="huella-box"></div>
-              <div class="huella-label">Huella</div>
+              <div class="huella-label">Índice derecho</div>
             </div>
           </div>
           <div class="firma-box"></div>
@@ -792,12 +797,6 @@
           </div>
         </div>
       <?php endforeach; ?>
-
-      <p style="font-size: 9.5pt; color: #666; margin-top: 16px; border-top: 1px solid #999; padding-top: 10px;">
-        <strong>Instrucciones de Pago:</strong> Al realizar una transferencia bancaria, favor indicar
-        el número de pagaré <strong><?= e($loan['loan_number']) ?></strong> en la referencia o concepto
-        de la transferencia para una correcta identificación del pago.
-      </p>
     </div>
   <?php endif; ?>
 
@@ -805,7 +804,7 @@
   <!-- PÁGINA 4: ANEXO II - TABLA DE AMORTIZACIÓN -->
   <!-- ═══════════════════════════════════════════════════════════════ -->
 
-  <?php if (!empty($installments)): ?>
+  <?php if (count($installments) > 0): ?>
     <div class="page page-break avoid-break">
       <h1 style="font-size: 12pt;">Anexo II – Tabla de Amortización</h1>
       <p style="text-align: center; font-size: 10pt; color: #555; margin-bottom: 12px;">
@@ -837,17 +836,15 @@
                   ... (<?= count($installments) - 19 ?> cuotas intermedias) ...
                 </td>
               </tr>
-            <?php
-              continue;
-            endif;
-            ?>
+            <?php continue;
+            endif; ?>
             <tr>
-              <td><?= $inst['installment_number'] ?></td>
-              <td><?= date('d/m/Y', strtotime($inst['due_date'])) ?></td>
-              <td><?= $currency ?> <?= number_format($inst['principal_amount'], 2) ?></td>
-              <td><?= $currency ?> <?= number_format($inst['interest_amount'], 2) ?></td>
-              <td><?= $currency ?> <?= number_format($inst['total_amount'], 2) ?></td>
-              <td><?= $currency ?> <?= number_format($inst['balance_after'], 2) ?></td>
+              <td><?= $inst['installment_number'] ?? $inst['numero_cuota'] ?? '' ?></td>
+              <td><?= date('d/m/Y', strtotime($inst['due_date'] ?? $inst['fecha_vencimiento'] ?? '')) ?></td>
+              <td><?= $currency ?> <?= number_format($inst['principal_amount'] ?? $inst['principal'] ?? 0, 2) ?></td>
+              <td><?= $currency ?> <?= number_format($inst['interest_amount'] ?? $inst['interest'] ?? $inst['interes'] ?? 0, 2) ?></td>
+              <td><?= $currency ?> <?= number_format($inst['total_amount'] ?? $inst['total'] ?? 0, 2) ?></td>
+              <td><?= $currency ?> <?= number_format($inst['balance_after'] ?? $inst['saldo'] ?? 0, 2) ?></td>
             </tr>
           <?php endforeach; ?>
         </tbody>

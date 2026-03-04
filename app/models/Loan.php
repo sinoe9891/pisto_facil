@@ -1,4 +1,5 @@
 <?php
+
 /**
  * APP: app/models/Loan.php
  * MODELO COMPLETO DE PRÉSTAMOS (SIN deleted_at)
@@ -7,6 +8,7 @@
 namespace App\Models;
 
 use App\Core\DB;
+use App\Core\Auth;
 
 class Loan
 {
@@ -214,7 +216,7 @@ class Loan
     {
         $loan = self::find($id);
         if (!$loan) return [];
-        
+
         return [
             'cash'     => (bool)$loan['payment_method_cash'],
             'transfer' => (bool)$loan['payment_method_transfer'],
@@ -229,7 +231,7 @@ class Loan
     public static function getBankAccounts(): array
     {
         $accounts = [];
-        
+
         for ($i = 1; $i <= 3; $i++) {
             $bankName = setting("bank_name_$i");
             if (!empty($bankName)) {
@@ -243,7 +245,7 @@ class Loan
                 ];
             }
         }
-        
+
         return $accounts;
     }
 
@@ -256,7 +258,7 @@ class Loan
         if (!$loan || !$loan['payment_method_transfer']) {
             return [];
         }
-        
+
         return self::getBankAccounts();
     }
 
@@ -267,11 +269,11 @@ class Loan
     {
         $loan = self::find($id);
         if (!$loan) return [];
-        
+
         $installments = self::getInstallments($id);
         $totalPrincipal = (float)$loan['principal'];
         $totalInterest = (float)array_sum(array_column($installments, 'interest_amount'));
-        
+
         return [
             'loan'           => $loan,
             'installments'   => $installments,
@@ -300,7 +302,7 @@ class Loan
     {
         $loan = self::find($id);
         if (!$loan) return;
-        
+
         if ($loan['balance'] <= 0.01) {
             DB::update('loans', [
                 'status' => 'paid',
@@ -316,7 +318,7 @@ class Loan
     {
         $allowed = ['active', 'paid', 'defaulted', 'cancelled', 'restructured'];
         if (!in_array($status, $allowed, true)) return;
-        
+
         DB::update('loans', ['status' => $status], 'id = ?', [$id]);
     }
 
@@ -326,7 +328,7 @@ class Loan
     public static function getOverdue(int $days = 0): array
     {
         $dateStr = $days > 0 ? "DATE_SUB(CURDATE(), INTERVAL $days DAY)" : 'CURDATE()';
-        
+
         return DB::all(
             "SELECT DISTINCT l.* 
              FROM loans l
@@ -419,7 +421,7 @@ class Loan
         $totalInstallments = count($installments);
         $paidInstallments = count(array_filter($installments, fn($i) => $i['status'] === 'paid'));
         $pendingInstallments = count(array_filter($installments, fn($i) => in_array($i['status'], ['pending', 'partial'])));
-        
+
         $totalDue = array_sum(array_column($installments, 'total_amount'));
         $totalPaid = array_sum(array_column($installments, 'paid_amount'));
         $totalPending = $totalDue - $totalPaid;
@@ -442,8 +444,7 @@ class Loan
     public static function logEvent(int $loanId, string $eventType, string $description, ?array $meta = null, int $userId = 0): void
     {
         if (!$userId) {
-            $user = auth();
-            $userId = $user ? $user['id'] : 0;
+            $userId = (int) (Auth::id() ?? 0);
         }
 
         DB::insert('loan_events', [

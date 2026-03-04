@@ -1,4 +1,5 @@
 <?php
+
 /**
  * APP: app/controllers/LoanController.php
  * VERSIÓN: Completa con Métodos de Pago
@@ -357,14 +358,18 @@ class LoanController extends Controller
         $loan = Loan::find((int)$id);
         if (!$loan) $this->redirect('/loans');
 
-        $client = Client::find((int)$loan['client_id']);
-        $aval   = !empty($loan['aval_id']) ? Client::findAvalById((int)$loan['aval_id']) : null;
+        $client       = Client::find((int)$loan['client_id']);
+        $aval         = !empty($loan['aval_id']) ? Client::findAvalById((int)$loan['aval_id']) : null;
+
+        // ✅ ESTA ES LA LÍNEA QUE TE FALTA
+        $installments = Loan::getInstallments((int)$id);
 
         $this->render('documents/pagare', [
-            'title'  => 'Pagaré · ' . $loan['loan_number'],
-            'loan'   => $loan,
-            'client' => $client,
-            'aval'   => $aval,
+            'title'        => 'Pagaré · ' . $loan['loan_number'],
+            'loan'         => $loan,
+            'client'       => $client,
+            'aval'         => $aval,
+            'installments' => $installments, // ✅ Y SE LO PASAS A LA VISTA
         ], null);
     }
 
