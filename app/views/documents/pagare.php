@@ -18,6 +18,7 @@
   loan_term=<?= (int)($loan['term_months'] ?? 0) ?> |
   loan_principal=<?= (float)($loan['principal'] ?? 0) ?>
 </div> -->
+
 <head>
   <meta charset="UTF-8">
   <title>Pagaré – <?= htmlspecialchars($loan['loan_number'] ?? '') ?></title>
@@ -143,6 +144,22 @@
     }
 
     <?php elseif ($pageSize === 'legal'): ?>
+
+    /* LEGAL: más espacio para firmar */
+    .firmas {
+      margin-top: 85px;
+    }
+
+    /* separa la sección de firmas del texto */
+    .firmas-fecha {
+      margin-top: 28px;
+    }
+    .huella-wrap {
+      display: inline-block;
+      text-align: center;
+      margin-top: 80px;
+    }
+    /* separa la fecha de las firmas */
     /* LEGAL: 8.5" x 14" - MANTIENE TAMAÑO NORMAL */
     /* Sin cambios - mantiene valores originales */
     <?php elseif ($pageSize === 'a4'): ?>
@@ -357,7 +374,7 @@
     .huella-wrap {
       display: inline-block;
       text-align: center;
-      margin-top: 6px;
+      margin-top: 80px;
     }
 
     .huella-box {
@@ -509,45 +526,48 @@
   $dueDateParts  = $dueDate ? explode('-', $dueDate) : ['____', '__', '__'];
   $lateFeeRate   = number_format((float)($loan['late_fee_rate'] ?? 0) * 100, 2);
 
-$installments = isset($installments) ? (array)$installments : [];
+  $installments = isset($installments) ? (array)$installments : [];
 
-$sumField = function(array $rows, array $keys): float {
-  $sum = 0.0;
-  foreach ($rows as $r) {
-    if (!is_array($r)) continue;
-    $val = null;
-    foreach ($keys as $k) {
-      if (isset($r[$k]) && $r[$k] !== '') { $val = $r[$k]; break; }
+  $sumField = function (array $rows, array $keys): float {
+    $sum = 0.0;
+    foreach ($rows as $r) {
+      if (!is_array($r)) continue;
+      $val = null;
+      foreach ($keys as $k) {
+        if (isset($r[$k]) && $r[$k] !== '') {
+          $val = $r[$k];
+          break;
+        }
+      }
+      $sum += (float)($val ?? 0);
     }
-    $sum += (float)($val ?? 0);
+    return $sum;
+  };
+
+  // Totales (soporta cualquier estructura)
+  $totalPrincipal = $sumField($installments, ['principal_amount', 'principal', 'capital']);
+  $totalInterest  = $sumField($installments, ['interest_amount', 'interest', 'interes']);
+  $totalToPay     = $sumField($installments, ['total_amount', 'total', 'cuota_total']);
+
+  // echo "<!-- Debug Totales: principal=$totalPrincipal, interest=$totalInterest, total=$totalToPay -->";
+
+  // Si no viene total por cuota, lo armamos
+  if ($totalToPay <= 0 && ($totalPrincipal > 0 || $totalInterest > 0)) {
+    $totalToPay = $totalPrincipal + $totalInterest;
   }
-  return $sum;
-};
 
-// Totales (soporta cualquier estructura)
-$totalPrincipal = $sumField($installments, ['principal_amount','principal','capital']);
-$totalInterest  = $sumField($installments, ['interest_amount','interest','interes']);
-$totalToPay     = $sumField($installments, ['total_amount','total','cuota_total']);
+  // Fallback SOLO si NO hay cuotas reales
+  if ($totalToPay <= 0 || empty($installments)) {
+    $totalPrincipal = (float)$amount;
+    $interestRate   = (float)($loan['interest_rate'] ?? 0);
+    $termMonths     = (int)($loan['term_months'] ?? 1);
 
-// echo "<!-- Debug Totales: principal=$totalPrincipal, interest=$totalInterest, total=$totalToPay -->";
+    // Si tu interest_rate viniera como 15 en vez de 0.15, descomenta esto:
+    // if ($interestRate > 1) $interestRate = $interestRate / 100;
 
-// Si no viene total por cuota, lo armamos
-if ($totalToPay <= 0 && ($totalPrincipal > 0 || $totalInterest > 0)) {
-  $totalToPay = $totalPrincipal + $totalInterest;
-}
-
-// Fallback SOLO si NO hay cuotas reales
-if ($totalToPay <= 0 || empty($installments)) {
-  $totalPrincipal = (float)$amount;
-  $interestRate   = (float)($loan['interest_rate'] ?? 0);
-  $termMonths     = (int)($loan['term_months'] ?? 1);
-
-  // Si tu interest_rate viniera como 15 en vez de 0.15, descomenta esto:
-  // if ($interestRate > 1) $interestRate = $interestRate / 100;
-
-  $totalInterest  = $totalPrincipal * $interestRate * $termMonths;
-  $totalToPay     = $totalPrincipal + $totalInterest;
-}
+    $totalInterest  = $totalPrincipal * $interestRate * $termMonths;
+    $totalToPay     = $totalPrincipal + $totalInterest;
+  }
 
   // Meses en español
   $spanishMonths = [
@@ -691,7 +711,7 @@ if ($totalToPay <= 0 || empty($installments)) {
             <div><?= e($clientName) ?></div>
             <div>Identidad: <?= e($clientId) ?></div>
           </div>
-          <div style="margin-top: 4px; font-size: 9pt;">HUELLA:</div>
+          <div style="margin-top: 20px; font-size: 9pt;">HUELLA:</div>
           <div class="huella-wrap">
             <div class="huella-box"></div>
             <div class="huella-label">Índice derecho</div>
@@ -748,7 +768,7 @@ if ($totalToPay <= 0 || empty($installments)) {
         aceptando que el acreedor pueda exigirme el pago directamente sin requerimiento al deudor principal.
       </p>
 
-      <div class="firmas avoid-break" style="margin-top: 40px;">
+      <div class="firmas avoid-break" style="margin-top: 80px;">
         <div class="firmas-row">
           <div class="firma-box">
             <div class="firma-line"></div>

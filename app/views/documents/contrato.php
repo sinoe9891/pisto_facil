@@ -107,7 +107,7 @@
     }
 
     .firmas {
-      margin-top: 60px;
+      margin-top: 40px;
     }
 
     .firma-line {
@@ -299,7 +299,7 @@
     }
 
     .firmas {
-      margin-top: 80px;
+      margin-top: 40px;
       page-break-inside: avoid;
     }
 
@@ -332,7 +332,7 @@
     .huella-wrap {
       display: inline-block;
       text-align: center;
-      margin-top: 8px;
+      margin-top: 80px;
     }
 
     .huella-box {
@@ -822,18 +822,19 @@
       es nula y no vinculante.
     </p>
 
+    
   </div>
 
   <!-- FIRMAS - PÁGINA SEPARADA PARA PROTEGER CORTES -->
   <div class="page page-break-before">
-    <h1 style="font-size: 12pt; text-align: center; text-transform: uppercase; margin-bottom: 30px;">
+    <h1 style="font-size: 12pt; text-align: center; text-transform: uppercase; margin-bottom: 30px;margin-top: 30px;">
       Firmas y Reconocimiento de Obligaciones
     </h1>
-
+  
     <p style="text-align: center; font-size: 10pt; color: #666; margin-bottom: 30px;">
       Contrato No. <?= e($loan['loan_number']) ?>
     </p>
-
+  
     <div class="firmas avoid-break">
       <div class="firmas-row">
         <div class="firma-box">
@@ -865,7 +866,7 @@
           <?php endif; ?>
         </div>
       </div>
-
+  
       <?php if ($aval): ?>
         <div class="firmas-row" style="margin-top: 80px;">
           <div class="firma-box">
@@ -885,7 +886,7 @@
         </div>
       <?php endif; ?>
     </div>
-
+  
     <p style="margin-top: 40px; font-size: 10pt; text-align: center; color: #666;">
       Firmado en <?= e($companyCity ?: '______________________________') ?>,
       a los <?= $today ?> días del mes de <?= $month ?> del año <?= $year ?>.
