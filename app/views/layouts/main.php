@@ -4,11 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= htmlspecialchars($title ?? 'Dashboard') ?> · <?= htmlspecialchars($config['name'] ?? 'Préstamos') ?></title>
+  <title><?= htmlspecialchars($title ?? 'Dashboard') ?> · <?= htmlspecialchars($config['name'] ?? 'Préstamos') ?>
+  </title>
   <link rel="icon" type="image/png" sizes="32x32" href="<?= url('/assets/icons/favicon-32.png') ?>">
   <link rel="icon" type="image/png" sizes="16x16" href="<?= url('/assets/icons/favicon-16.png') ?>">
   <link rel="apple-touch-icon" sizes="180x180" href="<?= url('/assets/icons/apple-touch-icon.png') ?>">
-  <meta name="description" content="Plataforma para administrar préstamos personales: registro de clientes, creación de préstamos, cálculo de cuotas e intereses, control de pagos y mora, reportes, y generación de pagaré y contrato. Ideal para financieras, prestamistas y asesores.">
+  <meta name="description"
+    content="Plataforma para administrar préstamos personales: registro de clientes, creación de préstamos, cálculo de cuotas e intereses, control de pagos y mora, reportes, y generación de pagaré y contrato. Ideal para financieras, prestamistas y asesores.">
   <!-- Bootstrap 5 -->
   <link rel="stylesheet" href="<?= url('assets/vendor/bootstrap/bootstrap.min.css') ?>">
   <!-- Bootstrap Icons -->
@@ -242,7 +244,8 @@
     $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); ?>
 
     <div class="nav-section">Principal</div>
-    <a href="<?= url('/dashboard') ?>" class="nav-link <?= str_contains($currentPath, 'dashboard') ? 'active' : '' ?>">
+    <a href="<?= url('/dashboard') ?>"
+      class="nav-link <?= str_contains($currentPath, 'dashboard') ? 'active' : '' ?>">
       <i class="bi bi-speedometer2"></i> Dashboard
     </a>
 
@@ -254,20 +257,23 @@
       <a href="<?= url('/loans') ?>" class="nav-link <?= str_contains($currentPath, '/loans') ? 'active' : '' ?>">
         <i class="bi bi-cash-coin"></i> Préstamos
       </a>
-      <a href="<?= url('/payments') ?>" class="nav-link <?= str_contains($currentPath, '/payments') ? 'active' : '' ?>">
+      <a href="<?= url('/payments') ?>"
+        class="nav-link <?= str_contains($currentPath, '/payments') ? 'active' : '' ?>">
         <i class="bi bi-credit-card"></i> Pagos
       </a>
     <?php endif; ?>
 
     <?php if ($role === 'cliente'): ?>
-      <a href="<?= url('/my-loans') ?>" class="nav-link <?= str_contains($currentPath, 'my-loans') ? 'active' : '' ?>">
+      <a href="<?= url('/my-loans') ?>"
+        class="nav-link <?= str_contains($currentPath, 'my-loans') ? 'active' : '' ?>">
         <i class="bi bi-file-text"></i> Mis Préstamos
       </a>
     <?php endif; ?>
 
     <?php if (in_array($role, ['superadmin', 'admin'])): ?>
       <div class="nav-section">Reportes</div>
-      <a href="<?= url('/reports/general') ?>" class="nav-link <?= str_contains($currentPath, 'reports') ? 'active' : '' ?>">
+      <a href="<?= url('/reports/general') ?>"
+        class="nav-link <?= str_contains($currentPath, 'reports') ? 'active' : '' ?>">
         <i class="bi bi-bar-chart-line"></i> Reportes
       </a>
     <?php endif; ?>
@@ -280,12 +286,24 @@
     <?php endif; ?>
 
     <?php if ($role === 'superadmin'): ?>
-      <a href="<?= url('/settings') ?>" class="nav-link <?= str_contains($currentPath, 'settings') ? 'active' : '' ?>">
+      <a href="<?= url('/settings') ?>"
+        class="nav-link <?= str_contains($currentPath, 'settings') ? 'active' : '' ?>">
         <i class="bi bi-gear"></i> Configuración
       </a>
 
-      <a href="<?= url('/contract-templates') ?>" class="nav-link <?= str_contains($currentPath, 'contract-templates') ? 'active' : '' ?>">
+      <a href="<?= url('/contract-templates') ?>"
+        class="nav-link <?= str_contains($currentPath, 'contract-templates') ? 'active' : '' ?>">
         <i class="bi bi-file-earmark-text"></i> Plantillas de Documentos
+      </a>
+    <?php endif; ?>
+
+    <?php if (in_array($role, ['superadmin', 'admin'])): ?>
+      <a href="<?= url('/fiscal') ?>" class="nav-link <?= str_contains($currentPath, '/fiscal') ? 'active' : '' ?>">
+        <i class="bi bi-file-earmark-check"></i> Información Fiscal
+      </a>
+      <a href="<?= url('/invoices') ?>"
+        class="nav-link <?= str_contains($currentPath, '/invoices') ? 'active' : '' ?>">
+        <i class="bi bi-receipt"></i> Facturas
       </a>
     <?php endif; ?>
 
@@ -296,12 +314,14 @@
           <?= strtoupper(substr($auth['name'] ?? 'U', 0, 2)) ?>
         </div>
         <div style="overflow:hidden">
-          <div style="font-size:.8rem;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          <div
+            style="font-size:.8rem;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
             <?= htmlspecialchars($auth['name'] ?? '') ?>
           </div>
           <div style="font-size:.7rem;color:#64748b"><?= htmlspecialchars($auth['role'] ?? '') ?></div>
         </div>
-        <a href="<?= url('/logout') ?>" class="ms-auto text-secondary" title="Cerrar sesión" style="font-size:1.1rem">
+        <a href="<?= url('/logout') ?>" class="ms-auto text-secondary" title="Cerrar sesión"
+          style="font-size:1.1rem">
           <i class="bi bi-box-arrow-right"></i>
         </a>
       </div>
@@ -310,7 +330,8 @@
 
   <!-- TOPBAR -->
   <header id="topbar">
-    <button class="btn btn-sm btn-light d-lg-none me-2" onclick="document.getElementById('sidebar').classList.toggle('show')">
+    <button class="btn btn-sm btn-light d-lg-none me-2"
+      onclick="document.getElementById('sidebar').classList.toggle('show')">
       <i class="bi bi-list fs-5"></i>
     </button>
     <span class="page-title"><?= htmlspecialchars($title ?? '') ?></span>
@@ -327,7 +348,8 @@
     <div class="main-content">
       <!-- Flash messages -->
       <?php foreach ($flash ?? [] as $f): ?>
-        <div class="alert alert-<?= $f['type'] === 'error' ? 'danger' : ($f['type'] === 'success' ? 'success' : 'warning') ?> alert-dismissible fade show" role="alert">
+        <div class="alert alert-<?= $f['type'] === 'error' ? 'danger' : ($f['type'] === 'success' ? 'success' : 'warning') ?> alert-dismissible fade show"
+          role="alert">
           <i class="bi bi-<?= $f['type'] === 'error' ? 'exclamation-triangle' : 'check-circle' ?> me-2"></i>
           <?= htmlspecialchars($f['message']) ?>
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>

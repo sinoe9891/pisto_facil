@@ -1,3 +1,10 @@
+<?php
+
+/** @var array $templates */
+$isAdmin = \App\Core\Auth::isAdmin();
+?>
+
+
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h5 class="mb-0">Plantillas de Documentos</h5>
   <a class="btn btn-primary" href="<?= url('/contract-templates/create') ?>">
@@ -19,7 +26,7 @@
           </tr>
         </thead>
         <tbody>
-          <?php foreach (($templates ?? []) as $t): ?>
+          <?php foreach ($templates ?? [] as $t): ?>
             <tr>
               <td><?= (int)$t['id'] ?></td>
               <td><?= e($t['name'] ?? '') ?></td>
@@ -32,21 +39,25 @@
                 <?php endif; ?>
               </td>
               <td class="text-end">
-                <a class="btn btn-sm btn-outline-primary" href="<?= url('/contract-templates/'.$t['id'].'/edit') ?>">
+                <a class="btn btn-sm btn-outline-primary"
+                  href="<?= url('/contract-templates/' . $t['id'] . '/edit') ?>">
                   <i class="bi bi-pencil"></i>
                 </a>
                 <a class="btn btn-sm btn-outline-secondary" target="_blank"
-                   href="<?= url('/contract-templates/'.$t['id'].'/preview') ?>"
+                  href="<?= url('/contract-templates/' . $t['id'] . '/preview') ?>">
                   <i class="bi bi-printer"></i>
                 </a>
-                <a class="btn btn-sm btn-outline-warning" href="<?= url('/contract-templates/'.$t['id'].'/toggle') ?>">
+                <a class="btn btn-sm btn-outline-warning"
+                  href="<?= url('/contract-templates/' . $t['id'] . '/toggle') ?>">
                   <i class="bi bi-toggle2-on"></i>
                 </a>
               </td>
             </tr>
           <?php endforeach; ?>
           <?php if (empty($templates)): ?>
-            <tr><td colspan="5" class="text-center text-muted py-4">No hay plantillas aún.</td></tr>
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">No hay plantillas aún.</td>
+            </tr>
           <?php endif; ?>
         </tbody>
       </table>

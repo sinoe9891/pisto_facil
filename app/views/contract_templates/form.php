@@ -25,7 +25,10 @@ $variables = [
         '{{monto_letras}}'         => 'Monto en letras',
         '{{moneda}}'               => 'Símbolo moneda',
         '{{tasa_interes}}'         => 'Tasa de Interés %',
-        '{{tasa_mora}}'            => 'Tasa Moratoria %',
+        '{{tasa_mora}}'            => 'Tasa Moratoria % Mensual',
+        '{{tasa_mora_mensual}}'    => 'Tasa Moratoria % Mensual (igual a tasa_mora)',
+        '{{tasa_mora_diaria}}'     => 'Tasa Moratoria % Diaria (mensual ÷ 30)',
+        '{{dias_gracia}}'          => 'Días de Gracia del préstamo',
         '{{plazo}}'                => 'Plazo (cuotas)',
         '{{frecuencia}}'           => 'Frecuencia de pago',
         '{{tipo_prestamo}}'        => 'Tipo de préstamo',
@@ -82,11 +85,12 @@ $variables = [
                 </div>
                 <?php foreach ($variables as $grupo => $vars): ?>
                     <div class="mb-2">
-                        <div class="fw-semibold text-muted" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;padding:4px 0"><?= $grupo ?></div>
+                        <div class="fw-semibold text-muted"
+                            style="font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;padding:4px 0">
+                            <?= $grupo ?></div>
                         <?php foreach ($vars as $tag => $desc): ?>
                             <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1 var-btn"
-                                data-tag="<?= htmlspecialchars($tag) ?>"
-                                title="<?= htmlspecialchars($desc) ?>"
+                                data-tag="<?= htmlspecialchars($tag) ?>" title="<?= htmlspecialchars($desc) ?>"
                                 style="font-size:.72rem;padding:2px 6px">
                                 <?= htmlspecialchars($tag) ?>
                             </button>
@@ -110,16 +114,23 @@ $variables = [
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Nombre de la Plantilla <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold">Nombre de la Plantilla <span
+                                    class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control" required
                                 value="<?= htmlspecialchars($template['name'] ?? '') ?>">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold">Tipo</label>
                             <select name="template_type" class="form-select">
-                                <option value="contrato" <?= ($template['template_type'] ?? 'contrato') === 'contrato' ? 'selected' : '' ?>>Contrato de Préstamo</option>
-                                <option value="pagare" <?= ($template['template_type'] ?? '') === 'pagare'   ? 'selected' : '' ?>>Pagaré</option>
-                                <option value="otro" <?= ($template['template_type'] ?? '') === 'otro'     ? 'selected' : '' ?>>Otro</option>
+                                <option value="contrato"
+                                    <?= ($template['template_type'] ?? 'contrato') === 'contrato' ? 'selected' : '' ?>>
+                                    Contrato de Préstamo</option>
+                                <option value="pagare"
+                                    <?= ($template['template_type'] ?? '') === 'pagare'   ? 'selected' : '' ?>>Pagaré
+                                </option>
+                                <option value="otro"
+                                    <?= ($template['template_type'] ?? '') === 'otro'     ? 'selected' : '' ?>>Otro
+                                </option>
                             </select>
                         </div>
                         <?php if ($isEdit): ?>
@@ -127,16 +138,18 @@ $variables = [
                                 <label class="form-label fw-semibold">Estado</label>
                                 <select name="is_active" class="form-select">
                                     <option value="1" <?= ($template['is_active'] ?? 1) ? 'selected' : '' ?>>Activa</option>
-                                    <option value="0" <?= !($template['is_active'] ?? 1) ? 'selected' : '' ?>>Inactiva</option>
+                                    <option value="0" <?= !($template['is_active'] ?? 1) ? 'selected' : '' ?>>Inactiva
+                                    </option>
                                 </select>
                             </div>
                         <?php endif; ?>
                     </div>
 
                     <!-- TinyMCE editor -->
-                    <label class="form-label fw-semibold">Contenido del Documento <span class="text-danger">*</span></label>
-                    <textarea name="content" id="template-content" class="form-control"
-                        rows="20" style="font-family:monospace"><?= htmlspecialchars($content) ?></textarea>
+                    <label class="form-label fw-semibold">Contenido del Documento <span
+                            class="text-danger">*</span></label>
+                    <textarea name="content" id="template-content" class="form-control" rows="20"
+                        style="font-family:monospace"><?= htmlspecialchars($content) ?></textarea>
 
                     <div class="d-flex gap-2 mt-3">
                         <button type="submit" class="btn btn-primary">
@@ -154,24 +167,26 @@ $variables = [
 <script src="<?= url('/assets/vendor/tinymce/tinymce/tinymce.min.js') ?>"></script>
 <script>
     tinymce.init({
-  selector: '#template-content',
-  language: 'es',
-  language_url: '<?= url("/assets/vendor/tinymce/tinymce/langs/es.js") ?>',
-  base_url: '<?= url("/assets/vendor/tinymce/tinymce") ?>',
-  suffix: '.min',
-  plugins: 'table lists link code fullscreen',
-  toolbar: [
-    'undo redo | bold italic underline | forecolor backcolor',
-    'alignleft aligncenter alignright alignjustify | bullist numlist | table | link | code fullscreen'
-  ],
-  menubar: false,
-  height: 550,
-  content_css: 'document',
-  valid_elements: '*[*]',
-  extended_valid_elements: '*[*]',
-  forced_root_block: 'p',
-  setup: function(editor) { window._tinyEditor = editor; }
-});
+        selector: '#template-content',
+        language: 'es',
+        language_url: '<?= url("/assets/vendor/tinymce/tinymce/langs/es.js") ?>',
+        base_url: '<?= url("/assets/vendor/tinymce/tinymce") ?>',
+        suffix: '.min',
+        plugins: 'table lists link code fullscreen',
+        toolbar: [
+            'undo redo | bold italic underline | forecolor backcolor',
+            'alignleft aligncenter alignright alignjustify | bullist numlist | table | link | code fullscreen'
+        ],
+        menubar: false,
+        height: 550,
+        content_css: 'document',
+        valid_elements: '*[*]',
+        extended_valid_elements: '*[*]',
+        forced_root_block: 'p',
+        setup: function(editor) {
+            window._tinyEditor = editor;
+        }
+    });
 
     // Insertar variable en la posición del cursor
     document.querySelectorAll('.var-btn').forEach(function(btn) {

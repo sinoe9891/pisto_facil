@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 // ============================================================
@@ -8,7 +9,7 @@ declare(strict_types=1);
 define('ROOT_PATH',  __DIR__);
 define('APP_PATH',   ROOT_PATH . '/app');
 define('PUB_PATH',   __DIR__);
-define('APP_VERSION','1.0.0');
+define('APP_VERSION', '1.0.0');
 
 // Load .env (simple parser, no package needed)
 $envFile = ROOT_PATH . '/.env';
@@ -45,13 +46,17 @@ spl_autoload_register(function (string $class): void {
         if (str_starts_with($class, $prefix)) {
             $relative = str_replace('\\', '/', substr($class, strlen($prefix)));
             $file     = $dir . $relative . '.php';
-            if (file_exists($file)) { require $file; return; }
+            if (file_exists($file)) {
+                require $file;
+                return;
+            }
         }
     }
 });
 
 // Start session
 use App\Core\Auth;
+
 Auth::start();
 
 // Global helpers
@@ -104,69 +109,85 @@ $router->get('/dashboard', 'DashboardController@index', ['auth']);
 $router->get('/',          'DashboardController@index', ['auth']);
 
 // CLIENTS
-$router->get( '/clients',              'ClientController@index',    ['auth','asesor']);
-$router->get( '/clients/create',       'ClientController@create',   ['auth','admin']);
-$router->post('/clients/store',        'ClientController@store',    ['auth','admin']);
-$router->get( '/clients/{id}',         'ClientController@show',     ['auth','asesor']);
-$router->get( '/clients/{id}/edit',    'ClientController@edit',     ['auth','admin']);
-$router->post('/clients/{id}/update',  'ClientController@update',   ['auth','admin']);
-$router->get( '/clients/{id}/delete',  'ClientController@delete',   ['auth','admin']);
-$router->post('/clients/{id}/upload',  'ClientController@uploadDoc',['auth','admin']);
-$router->get( '/clients/{id}/doc/{docId}/delete', 'ClientController@deleteDoc', ['auth','admin']);
-$router->get( '/clients/{id}/doc/{docId}/download', 'ClientController@downloadDoc', ['auth','asesor']);
+$router->get('/clients',              'ClientController@index',    ['auth', 'asesor']);
+$router->get('/clients/create',       'ClientController@create',   ['auth', 'admin']);
+$router->post('/clients/store',        'ClientController@store',    ['auth', 'admin']);
+$router->get('/clients/{id}',         'ClientController@show',     ['auth', 'asesor']);
+$router->get('/clients/{id}/edit',    'ClientController@edit',     ['auth', 'admin']);
+$router->post('/clients/{id}/update',  'ClientController@update',   ['auth', 'admin']);
+$router->get('/clients/{id}/delete',  'ClientController@delete',   ['auth', 'admin']);
+$router->post('/clients/{id}/upload',  'ClientController@uploadDoc', ['auth', 'admin']);
+$router->get('/clients/{id}/doc/{docId}/delete', 'ClientController@deleteDoc', ['auth', 'admin']);
+$router->get('/clients/{id}/doc/{docId}/download', 'ClientController@downloadDoc', ['auth', 'asesor']);
 
 // LOANS
-$router->get( '/loans',               'LoanController@index',      ['auth','asesor']);
-$router->get( '/loans/create',        'LoanController@create',     ['auth','admin']);
-$router->post('/loans/store',         'LoanController@store',      ['auth','admin']);
-$router->get( '/loans/{id}',          'LoanController@show',       ['auth','asesor']);
-$router->get( '/loans/{id}/edit',     'LoanController@edit',       ['auth','admin']);
-$router->post('/loans/{id}/update',   'LoanController@update',     ['auth','admin']);
-$router->get( '/loans/{id}/amortization', 'LoanController@amortization', ['auth','asesor']);
-$router->post('/loans/{id}/delete',      'LoanController@destroy',      ['auth','admin']);
-$router->get('/loans/{id}/pagare',   'LoanController@pagare',   ['auth','asesor']);
-$router->get('/loans/{id}/contrato', 'LoanController@contrato', ['auth','asesor']);
+$router->get('/loans',               'LoanController@index',      ['auth', 'asesor']);
+$router->get('/loans/create',        'LoanController@create',     ['auth', 'admin']);
+$router->post('/loans/store',         'LoanController@store',      ['auth', 'admin']);
+$router->get('/loans/{id}',          'LoanController@show',       ['auth', 'asesor']);
+$router->get('/loans/{id}/edit',     'LoanController@edit',       ['auth', 'admin']);
+$router->post('/loans/{id}/update',   'LoanController@update',     ['auth', 'admin']);
+$router->post('/loans/{id}/refinance', 'LoanController@refinance',  ['auth', 'admin']); // ← NUEVA
+$router->get('/loans/{id}/amortization', 'LoanController@amortization', ['auth', 'asesor']);
+$router->post('/loans/{id}/delete',   'LoanController@destroy',    ['auth', 'admin']);
+$router->get('/loans/{id}/pagare',   'LoanController@pagare',     ['auth', 'asesor']);
+$router->get('/loans/{id}/contrato', 'LoanController@contrato',   ['auth', 'asesor']);
 
 // AVALES (AJAX)
-$router->get('/avales/by-client', 'AvalController@byClient', ['auth','admin']);
+$router->get('/avales/by-client', 'AvalController@byClient', ['auth', 'admin']);
 
 // PAYMENTS
-$router->get( '/payments',             'PaymentController@index',   ['auth','asesor']);
-$router->get( '/payments/create',      'PaymentController@create',  ['auth','asesor']);
-$router->post('/payments/store',       'PaymentController@store',   ['auth','asesor']);
-$router->get( '/payments/{id}',        'PaymentController@show',    ['auth','asesor']);
-$router->get( '/payments/{id}/void',   'PaymentController@voidPayment', ['auth','admin']);
+$router->get('/payments',             'PaymentController@index',   ['auth', 'asesor']);
+$router->get('/payments/create',      'PaymentController@create',  ['auth', 'asesor']);
+$router->post('/payments/store',       'PaymentController@store',   ['auth', 'asesor']);
+$router->get('/payments/{id}',        'PaymentController@show',    ['auth', 'asesor']);
+$router->post('/payments/{id}/void', 'PaymentController@voidPayment', ['auth', 'admin']);
 
 // USERS
-$router->get( '/users',               'UserController@index',      ['auth','admin']);
-$router->get( '/users/create',        'UserController@create',     ['auth','admin']);
-$router->post('/users/store',         'UserController@store',      ['auth','admin']);
-$router->get( '/users/{id}/edit',     'UserController@edit',       ['auth','admin']);
-$router->post('/users/{id}/update',   'UserController@update',     ['auth','admin']);
-$router->get( '/users/{id}/toggle',   'UserController@toggle',     ['auth','admin']);
+$router->get('/users',               'UserController@index',      ['auth', 'admin']);
+$router->get('/users/create',        'UserController@create',     ['auth', 'admin']);
+$router->post('/users/store',         'UserController@store',      ['auth', 'admin']);
+$router->get('/users/{id}/edit',     'UserController@edit',       ['auth', 'admin']);
+$router->post('/users/{id}/update',   'UserController@update',     ['auth', 'admin']);
+$router->get('/users/{id}/toggle',   'UserController@toggle',     ['auth', 'admin']);
 
 // REPORTS
-$router->get( '/reports/general',     'ReportController@general',  ['auth','admin']);
-$router->get( '/reports/client/{id}', 'ReportController@client',   ['auth','admin']);
-$router->get( '/reports/projection',  'ReportController@projection',['auth','superadmin']);
-$router->get( '/reports/export',      'ReportController@export',   ['auth','admin']);
+$router->get('/reports/general',     'ReportController@general',  ['auth', 'admin']);
+$router->get('/reports/client/{id}', 'ReportController@client',   ['auth', 'admin']);
+$router->get('/reports/projection',  'ReportController@projection', ['auth', 'superadmin']);
+$router->get('/reports/export',      'ReportController@export',   ['auth', 'admin']);
 
 // SETTINGS
-$router->get( '/settings',            'SettingController@index',   ['auth','superadmin']);
-$router->post('/settings/update',     'SettingController@update',  ['auth','superadmin']);
+$router->get('/settings',            'SettingController@index',   ['auth', 'superadmin']);
+$router->post('/settings/update',     'SettingController@update',  ['auth', 'superadmin']);
 
 // CONTRACT TEMPLATES (Plantillas)
-$router->get('/contract-templates',                 'ContractTemplateController@index',  ['auth','superadmin']);
-$router->get('/contract-templates/create',          'ContractTemplateController@create', ['auth','superadmin']);
-$router->post('/contract-templates/store',          'ContractTemplateController@store',  ['auth','superadmin']);
-$router->get('/contract-templates/{id}/edit',       'ContractTemplateController@edit',   ['auth','superadmin']);
-$router->post('/contract-templates/{id}/update',    'ContractTemplateController@update', ['auth','superadmin']);
-$router->get('/contract-templates/{id}/toggle',     'ContractTemplateController@toggle', ['auth','superadmin']);
-$router->get('/contract-templates/{id}/preview',    'ContractTemplateController@preview',['auth','superadmin']);
+$router->get('/contract-templates',                 'ContractTemplateController@index',  ['auth', 'superadmin']);
+$router->get('/contract-templates/create',          'ContractTemplateController@create', ['auth', 'superadmin']);
+$router->post('/contract-templates/store',          'ContractTemplateController@store',  ['auth', 'superadmin']);
+$router->get('/contract-templates/{id}/edit',       'ContractTemplateController@edit',   ['auth', 'superadmin']);
+$router->post('/contract-templates/{id}/update',    'ContractTemplateController@update', ['auth', 'superadmin']);
+$router->get('/contract-templates/{id}/toggle',     'ContractTemplateController@toggle', ['auth', 'superadmin']);
+$router->get('/contract-templates/{id}/preview',    'ContractTemplateController@preview', ['auth', 'superadmin']);
 
 
 // CLIENT PORTAL
 $router->get('/my-loans',             'PortalController@index',    ['auth']);
+
+// FACTURAS FISCALES
+$router->get('/payments/{id}/invoice',  'InvoiceController@fromPayment', ['auth', 'asesor']);
+$router->post('/invoices/store',         'InvoiceController@store',       ['auth', 'asesor']);
+$router->get('/invoices',               'InvoiceController@index',       ['auth', 'admin']);
+$router->get('/invoices/{id}',          'InvoiceController@show',        ['auth', 'asesor']);
+$router->post('/invoices/{id}/void',     'InvoiceController@void',        ['auth', 'admin']);
+
+// INFORMACIÓN FISCAL (CAI)
+$router->get('/fiscal',             'FiscalCaiController@index',  ['auth', 'admin']);
+$router->get('/fiscal/create',      'FiscalCaiController@create', ['auth', 'admin']);
+$router->post('/fiscal/store',       'FiscalCaiController@store',  ['auth', 'admin']);
+$router->get('/fiscal/{id}/edit',   'FiscalCaiController@edit',   ['auth', 'admin']);
+$router->post('/fiscal/{id}/update', 'FiscalCaiController@update', ['auth', 'admin']);
+$router->get('/fiscal/{id}/toggle', 'FiscalCaiController@toggle', ['auth', 'admin']);
 
 // DISPATCH
 $router->dispatch();

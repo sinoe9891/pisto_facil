@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Controllers;
 
-use App\Core\Controller;
-use App\Core\CSRF;
+use App\Core\{Controller, Auth, CSRF, View};
 use App\Models\ContractTemplate;
 
 class ContractTemplateController extends Controller
@@ -11,113 +11,107 @@ class ContractTemplateController extends Controller
     {
         $templates = ContractTemplate::all();
         $this->render('contract_templates/index', [
-            'title' => 'Plantillas',
-            'templates' => $templates
+            'title'     => 'Plantillas de Documentos',
+            'templates' => $templates,
         ]);
     }
 
     public function create(): void
     {
         $this->render('contract_templates/form', [
-            'title' => 'Nueva Plantilla',
-            'template' => null
+            'title'    => 'Nueva Plantilla',
+            'template' => null,
         ]);
     }
 
     public function store(): void
     {
-        CSRF::verify();
+        CSRF::check();  // ← fix: era CSRF::verify()
 
-        $name    = trim($_POST['name'] ?? '');
+        $name    = trim($_POST['name']          ?? '');
         $type    = trim($_POST['template_type'] ?? 'contrato');
-        $content = $_POST['content'] ?? '';
+        $content = $_POST['content']            ?? '';
 
         if ($name === '' || trim($content) === '') {
-            $this->redirect('/contract-templates/create', 'Nombre y contenido son obligatorios.', 'error');
-            return;
+            $this->flashRedirect('/contract-templates/create', 'error', 'Nombre y contenido son obligatorios.');
         }
 
         ContractTemplate::create([
-            'name' => $name,
+            'name'          => $name,
             'template_type' => $type,
-            'content' => $content,
-            'is_active' => 1,
+            'content'       => $content,
+            'is_active'     => 1,
+            'created_by'    => Auth::id(),
         ]);
 
-        $this->redirect('/contract-templates', 'Plantilla creada correctamente.', 'success');
+        $this->flashRedirect('/contract-templates', 'success', 'Plantilla creada correctamente.');
     }
 
-    public function edit(int $id): void
+    public function edit(string $id): void
     {
-        $template = ContractTemplate::find($id);
+        $template = ContractTemplate::find((int)$id);
         if (!$template) {
-            $this->redirect('/contract-templates', 'Plantilla no encontrada.', 'error');
-            return;
+            $this->flashRedirect('/contract-templates', 'error', 'Plantilla no encontrada.');
         }
 
         $this->render('contract_templates/form', [
-            'title' => 'Editar Plantilla',
-            'template' => $template
+            'title'    => 'Editar Plantilla',
+            'template' => $template,
         ]);
     }
 
-    public function update(int $id): void
+    public function update(string $id): void
     {
-        CSRF::verify();
+        CSRF::check();  // ← fix: era CSRF::verify()
 
-        $template = ContractTemplate::find($id);
+        $template = ContractTemplate::find((int)$id);
         if (!$template) {
-            $this->redirect('/contract-templates', 'Plantilla no encontrada.', 'error');
-            return;
+            $this->flashRedirect('/contract-templates', 'error', 'Plantilla no encontrada.');
         }
 
-        $name     = trim($_POST['name'] ?? '');
+        $name     = trim($_POST['name']          ?? '');
         $type     = trim($_POST['template_type'] ?? 'contrato');
-        $content  = $_POST['content'] ?? '';
-        $isActive = (int)($_POST['is_active'] ?? 1);
+        $content  = $_POST['content']            ?? '';
+        $isActive = (int)($_POST['is_active']    ?? 1);
 
         if ($name === '' || trim($content) === '') {
-            $this->redirect('/contract-templates/'.$id.'/edit', 'Nombre y contenido son obligatorios.', 'error');
-            return;
+            $this->flashRedirect('/contract-templates/' . $id . '/edit', 'error', 'Nombre y contenido son obligatorios.');
         }
 
-        ContractTemplate::update($id, [
-            'name' => $name,
+        ContractTemplate::update((int)$id, [
+            'name'          => $name,
             'template_type' => $type,
-            'content' => $content,
-            'is_active' => $isActive,
+            'content'       => $content,
+            'is_active'     => $isActive,
         ]);
 
-        $this->redirect('/contract-templates', 'Plantilla actualizada correctamente.', 'success');
+        $this->flashRedirect('/contract-templates', 'success', 'Plantilla actualizada correctamente.');
     }
 
-    public function toggle(int $id): void
+    public function toggle(string $id): void
     {
-        $template = ContractTemplate::find($id);
+        $template = ContractTemplate::find((int)$id);
         if (!$template) {
-            $this->redirect('/contract-templates', 'Plantilla no encontrada.', 'error');
-            return;
+            $this->flashRedirect('/contract-templates', 'error', 'Plantilla no encontrada.');
         }
 
         $new = ((int)$template['is_active'] === 1) ? 0 : 1;
-        ContractTemplate::update($id, ['is_active' => $new]);
+        ContractTemplate::update((int)$id, ['is_active' => $new]);
 
-        $this->redirect('/contract-templates', 'Estado actualizado.', 'success');
+        $msg = $new ? 'Plantilla activada.' : 'Plantilla desactivada.';
+        $this->flashRedirect('/contract-templates', 'success', $msg);
     }
 
-    // ✅ antes se llamaba render() y chocaba con Controller::render()
-    public function preview(int $id): void
+    public function preview(string $id): void
     {
-        $template = ContractTemplate::find($id);
+        $template = ContractTemplate::find((int)$id);
         if (!$template) {
-            $this->redirect('/contract-templates', 'Plantilla no encontrada.', 'error');
-            return;
+            $this->flashRedirect('/contract-templates', 'error', 'Plantilla no encontrada.');
         }
 
-        // sin layout (pasando null)
         $this->render('contract_templates/render', [
             'title' => $template['name'] ?? 'Documento',
             'html'  => $template['content'] ?? '',
-        ], null);
+        ], null); // null = sin layout
     }
 }
